@@ -3,7 +3,7 @@ import socket
 import pygame
 from Utilities.real_time_plotter import live_plotter, live_plotter_xy
 from Utilities.repeated_timer import RepeatedTimer
-from model import Model
+from dynamic_model import Model
 
 # Open socket connection
 UDP_IP = "127.0.0.1"
