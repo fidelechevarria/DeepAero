@@ -27,19 +27,16 @@ def generate_sample():
 	de_hist = []
 	dr_hist = []
 	dt_hist = []
-	time_hist = []
-	p_hist = []
-	q_hist = []
-	r_hist = []
-	roll_hist = []
-	pitch_hist = []
-	yaw_hist = []
-	vx_dot_hist = []
-	vy_dot_hist = []
-	vz_dot_hist = []
+	Fx_hist = []
+	Fy_hist = []
+	Fz_hist = []
+	Mx_hist = []
+	My_hist = []
+	Mz_hist = []
 	vx_hist = []
 	vy_hist = []
 	vz_hist = []
+	time_hist = []
 
 	# Set control surfaces angular ranges
 	angular_range_ailerons = 0.25
@@ -68,22 +65,19 @@ def generate_sample():
 			de_hist.append(de)
 			dr_hist.append(dr)
 			dt_hist.append(dt)
-			p_hist.append(plane.p)
-			q_hist.append(plane.q)
-			r_hist.append(plane.r)
-			vx_dot_hist.append(plane.vx_dot)
-			vy_dot_hist.append(plane.vy_dot)
-			vz_dot_hist.append(plane.vz_dot)
+			Fx_hist.append(-plane.D)
+			Fy_hist.append(plane.Y)
+			Fz_hist.append(-plane.L)
+			Mx_hist.append(plane.LL)
+			My_hist.append(plane.MM)
+			Mz_hist.append(plane.NN)
 			vx_hist.append(plane.vx)
 			vy_hist.append(plane.vy)
 			vz_hist.append(plane.vz)
-			roll_hist.append(plane.roll)
-			pitch_hist.append(plane.pitch)
-			yaw_hist.append(plane.yaw)
 			time_hist.append(time)
 
 	# Create sample
-	X = sum([da_hist, de_hist, dr_hist, dt_hist, p_hist, q_hist, r_hist, roll_hist, pitch_hist, yaw_hist, vx_dot_hist, vy_dot_hist, vz_dot_hist, vx_hist, vy_hist, vz_hist], [])
+	X = sum([da_hist, de_hist, dr_hist, dt_hist, Fx_hist, Fy_hist, Fz_hist, Mx_hist, My_hist, Mz_hist, vx_hist, vy_hist, vz_hist], [])
 	y = random_aero
 
 	return X, y
