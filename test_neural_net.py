@@ -3,6 +3,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 # create model
 model = Sequential()
@@ -35,6 +36,11 @@ y = np.array(y).reshape((1, 26))
 # estimate accuracy on whole dataset using loaded weights
 loss = model.evaluate(X, y)
 prediction = model.predict(X)
-print("%s: %.2f%%" % (model.metrics_names, loss))
-print('Real coefficients: {}'.format(y))
-print('Prediction: {}'.format(prediction))
+
+# Visualization
+data = {'Real': y[0, :].tolist(), 'Predict': prediction[0, :].tolist()}
+df = pd.DataFrame(data)
+print('{}: {}'.format(model.metrics_names, loss))
+print(df.round(5))
+
+
