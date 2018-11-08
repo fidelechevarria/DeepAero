@@ -8,7 +8,7 @@ import pandas as pd
 # create model
 model = Sequential()
 
-model.add(Dense(1300, activation='relu', input_shape=(1300,)))
+model.add(Dense(1600, activation='relu', input_shape=(1600,)))
 model.add(Dropout(0.3))
 
 model.add(Dense(500, activation='relu'))
@@ -30,7 +30,7 @@ model.load_weights("model.h5")
 
 # Generate sample
 X, y = generate_sample()
-X = np.array(X).reshape((1, 1300))
+X = np.array(X).reshape((1, 1600))
 y = np.array(y).reshape((1, 26))
 
 # estimate accuracy on whole dataset using loaded weights

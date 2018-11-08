@@ -36,6 +36,9 @@ def generate_sample():
 	vx_hist = []
 	vy_hist = []
 	vz_hist = []
+	ox_hist = []
+	oy_hist = []
+	oz_hist = []
 	time_hist = []
 
 	# Set control surfaces angular ranges
@@ -74,10 +77,13 @@ def generate_sample():
 			vx_hist.append(plane.vx)
 			vy_hist.append(plane.vy)
 			vz_hist.append(plane.vz)
+			ox_hist.append(plane.p)
+			oy_hist.append(plane.q)
+			oz_hist.append(plane.r)
 			time_hist.append(time)
 
 	# Create sample
-	X = sum([da_hist, de_hist, dr_hist, dt_hist, Fx_hist, Fy_hist, Fz_hist, Mx_hist, My_hist, Mz_hist, vx_hist, vy_hist, vz_hist], [])
+	X = sum([da_hist, de_hist, dr_hist, dt_hist, Fx_hist, Fy_hist, Fz_hist, Mx_hist, My_hist, Mz_hist, vx_hist, vy_hist, vz_hist, ox_hist, oy_hist, oz_hist], [])
 	y = random_aero
 
 	return X, y

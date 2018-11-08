@@ -30,7 +30,7 @@ callbacks_list = [checkpoint, tensorboard]
 
 model = Sequential()
 
-model.add(Dense(1300, activation='relu', input_shape=(1300,)))
+model.add(Dense(1600, activation='relu', input_shape=(1600,)))
 model.add(Dropout(0.3))
 
 model.add(Dense(500, activation='relu'))
