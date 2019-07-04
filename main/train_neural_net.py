@@ -21,13 +21,13 @@ def generator(batch_size=32):
 train_generator = generator()
 validation_generator = generator()
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.callbacks import ModelCheckpoint, TensorBoard
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 
 filepath_mdl = 'model.h5'
 checkpoint = ModelCheckpoint(filepath_mdl, monitor='val_loss', verbose=1, save_best_only=True)
-tensorboard = TensorBoard(log_dir='./logs', batch_size=32, write_graph=True, update_freq='epoch')
+tensorboard = TensorBoard(log_dir='./logs', batch_size=32, write_graph=True)
 callbacks_list = [checkpoint, tensorboard]
 
 model = Sequential()
@@ -49,7 +49,7 @@ model.add(Dense(26))
 model.compile(loss='mse', optimizer='adam')
 history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=50, epochs=1000, validation_steps=20, callbacks=callbacks_list)
 
-from keras.models import Model
+from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
 
 ### plot the training and validation loss for each epoch
