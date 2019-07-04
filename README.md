@@ -1,3 +1,4 @@
+- TODO: Pasar el modelo dinámico y el generador de trayectorias a C y hacer el wrapper del compilado con distutils.
 - TODO: ¿Dejar controles, fuerzas, momentos como inputs?
 - TODO: Se puede quitar el tiempo ya que se hará todo el análisis a una frecuencia determinada.
 - TODO: Crear método de visualización de la trayectoria real VS trayectoria estimada.
