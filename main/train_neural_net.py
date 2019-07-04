@@ -1,8 +1,10 @@
 # NOTE: For launching TensorBoard session execute the following command:
 #     tensorboard --logdir=D:/Repositories/DeepSystemID/logs/
 
+import os.path, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 import numpy as np
-from generate_sample import generate_sample
+from modules.generate_sample import generate_sample
 
 def generator(batch_size=32):
 	while True:  # Loop forever so the generator never terminates

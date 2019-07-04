@@ -1,4 +1,6 @@
-from generate_sample import generate_sample
+import os.path, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
+from modules.generate_sample import generate_sample
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 import matplotlib.pyplot as plt

@@ -1,9 +1,11 @@
+import os.path, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 import numpy as np
 import socket
 import pygame
-from Utilities.real_time_plotter import live_plotter, live_plotter_xy
-from Utilities.repeated_timer import RepeatedTimer
-from dynamic_model import Model
+from utils.real_time_plotter import live_plotter, live_plotter_xy
+from utils.repeated_timer import RepeatedTimer
+from modules.dynamic_model import Model
 
 # Open socket connection
 UDP_IP = "127.0.0.1"
