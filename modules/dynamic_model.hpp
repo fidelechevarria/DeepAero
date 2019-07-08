@@ -2,14 +2,26 @@
 #define __DYNAMIC_MODEL_H__
 
 #include <math.h>
+#include <algorithm>
+#include <random>
 
 class Model
 {
     public:
-        Model(void);
-        void propagate();
+        Model(float states[], float params[], float aero[],
+              float controls[], float wind[], float turbulenceIntensity,
+              float servosResponseTime, float engineResponseTime, float initVelocity);
+        void propagate(float controls[], float dtime);
 
     private:
+
+        //Auxiliary variables
+        float _f;
+        float _R;
+        float _aux1;
+        float _m2ft;
+        float _rad2deg;
+        float _deg2rad;
 
         //Geometric and aerodynamic parameters
         float _m;
@@ -94,7 +106,11 @@ class Model
         float _lat;
         float _total_time;
         float _Xa;
+        float _Ya;
+        float _Za;
         float _Xt;
+        float _Yt;
+        float _Zt;
         float _rotor_rpm;
         float _servosResponseTime;
         float _engineResponseTime;
@@ -122,7 +138,7 @@ class Model
         float _TAS;
         float _TAS_North;
         float _TAS_East;
-        float _TAS_Down;
+        float _TAS_Up;
         float _TAS_x;
         float _TAS_y;
         float _TAS_z;
