@@ -2,7 +2,7 @@ from numba import jit
 import numpy as np
 
 @jit(nopython=True)
-def dynamics(controls, states, coefficients, parameters):
+def update(controls, states, coefficients, parameters):
 
     forces = np.zeros((3), dtype=np.float32)
     moments = np.zeros((3), dtype=np.float32)
