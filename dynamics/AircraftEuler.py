@@ -8,13 +8,13 @@ def update(controls, states, coefficients, parameters):
     moments = np.zeros((3), dtype=np.float32)
 
     # Unpack states
-    p = states[0]
-    q = states[1]
-    r = states[2]
-    alpha = states[3]
-    beta = states[4]
-    V = states[5]
-    TAS = states[6]
+    p = states[9]
+    q = states[10]
+    r = states[11]
+    alpha = states[12]
+    beta = states[13]
+    V = states[14]
+    TAS = states[15]
 
     # Unpack coefficients
     Cd0 = coefficients[0]
@@ -45,18 +45,18 @@ def update(controls, states, coefficients, parameters):
     Cnnr = coefficients[25]
 
     # Unpack parameters
-    servosResponseTime = parameters[0]
-    engineResponseTime = parameters[1]
-    rho = parameters[2]
-    S = parameters[3]
-    Tmax = parameters[4]
-    b = parameters[5]
-    c = parameters[6]
-    windNorth = parameters[7]
-    windEast = parameters[8]
-    windUp = parameters[9]
-    turbulenceIntensity = parameters[10]
-    complete = parameters[11]
+    S = parameters[2]
+    b = parameters[3]
+    c = parameters[4]
+    Tmax = parameters[9]
+    rho = parameters[10]
+    windNorth = parameters[12]
+    windEast = parameters[13]
+    windUp = parameters[14]
+    turbulenceIntensity = parameters[15]
+    servosResponseTime = parameters[16]
+    engineResponseTime = parameters[17]
+    complete = parameters[18]
 
     # Controls
     da = 0

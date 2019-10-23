@@ -25,33 +25,36 @@ class Vehicle():
         self.dynamics = AircraftEuler.update
 
     def loadKinematics(self, name):
-        from kinematics import ConstantKinematics
-        self.kinematics = ConstantKinematics.update
+        from kinematics import StandardKinematics
+        self.kinematics = StandardKinematics.update
 
     def step(self, dt):
-        return step_optimized(self.control, self.dynamics, self.kinematics)
+        return step_optimized(self.control, self.dynamics, self.kinematics, dt)
 
     def propagate(self, time, frequency):
         return propagate_optimized(self.control, self.dynamics, self.kinematics, time, frequency)
 
+
+# Optimized functions (Numba)
+
 @jit(nopython=True)
-def step_optimized(control, dynamics, kinematics):
+def step_optimized(control, dynamics, kinematics, dt):
     controls = control(np.ones((4), dtype=np.float32),
                        np.ones((7), dtype=np.float32))
     forces, moments = dynamics(controls, np.ones((7), dtype=np.float32),
                                          np.ones((26), dtype=np.float32),
-                                         np.ones((12), dtype=np.float32))
-    states = kinematics(np.ones((7), dtype=np.float32), forces, moments, 1)
-    return states
+                                         np.ones((19), dtype=np.float32))
+    return kinematics(np.ones((18), dtype=np.float32), forces, moments, 5*np.random.rand((19)), dt)
 
 @jit(nopython=True)
 def propagate_optimized(control, dynamics, kinematics, time, frequency):
-    states = step_optimized(control, dynamics, kinematics)
-    return states
+    for _ in range(time * frequency):
+        step_optimized(control, dynamics, kinematics, 1 / frequency)
+    return step_optimized(control, dynamics, kinematics, 1 / frequency)
 
 
 test = Vehicle()
 test.loadControl('whatever')
 test.loadDynamics('whatever')
 test.loadKinematics('whatever')
-print(test.propagate(1, 1))
+print(test.propagate(1, 100))
