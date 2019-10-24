@@ -7,12 +7,12 @@ class Vehicle():
     def __init__(self):
         self.id = None
         self.name = None
-        self.controls = np.zeros((4), dtype=np.float32)
+        self.controls = np.array([0, 0, 0, 1], dtype=np.float32) #TODO: Add init functions for all elements
         self.forces = np.zeros((3), dtype=np.float32)
         self.moments = np.zeros((3), dtype=np.float32)
-        self.states = np.zeros((3), dtype=np.float32)
+        self.states = np.array([0, 0, 600, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0, 50, 40, 0], dtype=np.float32)
+        self.parameters = np.array([750, 9.8056, 9.84, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 7000, 1.225, 0, 0, 0, 0, 0, 0.1, 0.1, 1], dtype=np.float32)
         self.coefficients = None
-        self.config = None
         self.control = None
         self.dynamics = None
         self.model = None
@@ -35,32 +35,23 @@ class Vehicle():
         self.kinematics = StandardKinematics.update
 
     def step(self, dt):
-        return step_optimized(self.control, self.dynamics, self.kinematics, self.coefficients, dt)
+        return step_optimized(self.control, self.dynamics, self.kinematics, self.states, self.controls, self.coefficients, self.parameters, dt)
 
     def propagate(self, time, frequency):
-        return propagate_optimized(self.control, self.dynamics, self.kinematics, self.coefficients, time, frequency)
+        return propagate_optimized(self.control, self.dynamics, self.kinematics, self.states, self.controls, self.coefficients, self.parameters, time, frequency)
 
 # Optimized functions (Numba)
+@jit(nopython=True)
+def step_optimized(control, dynamics, kinematics, states, controls, coefficients, parameters, dt):
+    controls = control(controls, states)
+    forces, moments = dynamics(controls, states, coefficients, parameters)
+    return kinematics(states, forces, moments, parameters, dt)
 
 @jit(nopython=True)
-def step_optimized(control, dynamics, kinematics, coefficients, dt):
-    controls = control(np.array([0, 0, 0, 1], dtype=np.float32),
-                       np.ones((7), dtype=np.float32))
-    forces, moments = dynamics(controls,
-                               np.ones((7), dtype=np.float32), 
-                               coefficients,
-                               np.ones((19), dtype=np.float32))
-    return kinematics(np.ones((18), dtype=np.float32),
-                      forces,
-                      moments,
-                      5*np.random.rand((19)), #TODO: Cambiar por coefficients
-                      dt)
-
-@jit(nopython=True)
-def propagate_optimized(control, dynamics, kinematics, coefficients, time, frequency):
+def propagate_optimized(control, dynamics, kinematics, states, controls, coefficients, parameters, time, frequency):
     for _ in range(time * frequency):
-        step_optimized(control, dynamics, kinematics, coefficients, 1 / frequency)
-    return step_optimized(control, dynamics, kinematics, coefficients, 1 / frequency)
+        states = step_optimized(control, dynamics, kinematics, states, controls, coefficients, parameters, 1 / frequency)
+    return states
 
 
 test = Vehicle()
