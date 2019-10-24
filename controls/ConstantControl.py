@@ -3,4 +3,4 @@ import numpy as np
 
 @jit(nopython=True)
 def update(controls, states):
-    return np.ones((4), dtype=np.float32)
+    return np.array([0, 0, 0, 1], dtype=np.float32)

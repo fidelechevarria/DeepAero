@@ -28,7 +28,7 @@ class Vehicle():
 
     def loadModel(self, name):
         data = pd.read_csv(f'models/{name}.model', sep=' ', names=['coefficients', 'values'])
-        self.coefficients = data['values'].values
+        self.coefficients = data['values'].values.astype(np.float32)
 
     def loadKinematics(self, name):
         from kinematics import StandardKinematics
@@ -40,12 +40,11 @@ class Vehicle():
     def propagate(self, time, frequency):
         return propagate_optimized(self.control, self.dynamics, self.kinematics, self.coefficients, time, frequency)
 
-
 # Optimized functions (Numba)
 
 @jit(nopython=True)
 def step_optimized(control, dynamics, kinematics, coefficients, dt):
-    controls = control(np.ones((4), dtype=np.float32),
+    controls = control(np.array([0, 0, 0, 1], dtype=np.float32),
                        np.ones((7), dtype=np.float32))
     forces, moments = dynamics(controls,
                                np.ones((7), dtype=np.float32), 
@@ -54,7 +53,7 @@ def step_optimized(control, dynamics, kinematics, coefficients, dt):
     return kinematics(np.ones((18), dtype=np.float32),
                       forces,
                       moments,
-                      5*np.random.rand((19)),
+                      5*np.random.rand((19)), #TODO: Cambiar por coefficients
                       dt)
 
 @jit(nopython=True)
