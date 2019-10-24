@@ -4,12 +4,12 @@
 #
 # Created by: PyQt5 UI code generator 5.13.1
 #
-# pyuic5 -x gui/mainwindow.ui -o gui/mainwindow.py
+# pyside2-uic -x gui/mainwindow.ui -o gui/mainwindow.py
 #
 # WARNING! All changes made in this file will be lost!
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
