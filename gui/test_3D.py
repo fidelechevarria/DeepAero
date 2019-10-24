@@ -85,7 +85,7 @@ class Window(Qt3DExtras.Qt3DWindow):
         self.torusMesh.setSlices(20)
 
         self.torusMesh = Qt3DRender.QMesh()
-        self.torusMesh.setSource(QUrl.fromLocalFile('geometries/Cessna_172P.stl'))
+        self.torusMesh.setSource(QUrl.fromLocalFile('geometries/Zivko_Edge_540.stl'))
 
         self.torusTransform = Qt3DCore.QTransform()
         self.torusTransform.setScale3D(QVector3D(1, 1, 1))
