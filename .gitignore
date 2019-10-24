@@ -9,3 +9,4 @@ logs*/
 .vscode
 env
 *.pyc
+*.autosave
