@@ -1,9 +1,9 @@
 import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 import numpy as np
+import pandas as pd
 import socket
 import pygame
-from utils.real_time_plotter import live_plotter, live_plotter_xy
 from utils.repeated_timer import RepeatedTimer
 from modules.dynamic_model import Model
 
@@ -49,6 +49,24 @@ line1 = []
 iteration = 0
 plot_style = 'state'
 
+# Initialize variables for data recording
+da = []
+de = []
+dr = []
+dt = []
+roll = []
+pitch = []
+yaw = []
+posNorth = []
+posEast = []
+posDown = []
+vx = []
+vy = []
+vz = []
+p = []
+q = []
+r = []
+
 def step():
 
 	# Define global variables
@@ -60,30 +78,44 @@ def step():
 
 	# Get joystick values
 	pygame.event.pump()
-	da = -js.get_axis(ROLL_AXIS) * angular_range_ailerons
-	de = -js.get_axis(PITCH_AXIS) * angular_range_elevator
-	dr = -js.get_axis(THROTTLE_AXIS) * angular_range_rudder
-	dt = -js.get_axis(YAW_AXIS) / 2 + 0.5
+	dac = -js.get_axis(ROLL_AXIS) * angular_range_ailerons
+	dec = -js.get_axis(PITCH_AXIS) * angular_range_elevator
+	drc = -js.get_axis(THROTTLE_AXIS) * angular_range_rudder
+	dtc = -js.get_axis(YAW_AXIS) / 2 + 0.5
 
 	# Propagate model and send to FlightGear
-	plane.propagate([da, de, dr, dt], 1/update_frequency, mode='complete')  # Propagate model
+	plane.propagate([dac, dec, drc, dtc], 1/update_frequency, mode='complete')  # Propagate model
 	array_FG = np.array([plane.lat*rad2deg, plane.lon*rad2deg, plane.alt*m2ft, plane.pitch*rad2deg, plane.roll*rad2deg, plane.yaw*rad2deg, plane.rotor_rpm, -plane.da/angular_range_ailerons, -plane.da/angular_range_ailerons, plane.de/angular_range_elevator, -plane.dr/angular_range_rudder])
 	buffer = array_FG.tobytes()
 	sock.sendto(buffer, (UDP_IP, UDP_PORT))  # Send array to FG
 
-	# Real-time plotting
-	if iteration % 10 == 0:
-		if plot_style == 'state':
-			x_vec[-1] = plane.total_time
-			y_vec[-1] = plane.TAS
-			error = 0
-		if error == 0:
-			line1 = live_plotter_xy(x_vec, y_vec, line1, title='True Air-Speed', x_label='Time (s)', y_label='TAS (m/s)', plot_style=plot_style)
-			x_vec = np.append(x_vec[1:], 0.0)
-			y_vec = np.append(y_vec[1:], 0.0)
+	# Fill in data structure
+	da.append(plane.da)
+	de.append(plane.de)
+	dr.append(plane.dr)
+	dt.append(plane.dt)
+	roll.append(plane.roll)
+	pitch.append(plane.pitch)
+	yaw.append(plane.yaw)
+	posNorth.append(plane.posNorth)
+	posEast.append(plane.posEast)
+	posDown.append(-plane.alt)
+	vx.append(plane.vx)
+	vy.append(plane.vy)
+	vz.append(plane.vz)
+	p.append(plane.p)
+	q.append(plane.q)
+	r.append(plane.r)
 
 	# Update counter
 	iteration += 1
+
+	# Save data
+	if iteration == update_frequency * 20:
+		df = pd.DataFrame({'da': da, 'de': de, 'dr': dr, 'dt': dt, 'roll': roll, 'pitch': pitch, 'yaw': yaw, 'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown, 'vx': vx, 'vy': vy, 'vz': vz, 'p': p, 'q': q, 'r': r})
+		print(df)
+		df.to_csv(path_or_buf='./data.csv')
+		sys.exit(0)
 
 
 # Start task scheduler
