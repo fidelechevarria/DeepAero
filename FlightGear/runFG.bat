@@ -23,8 +23,8 @@
 ::
 
 C:
-cd C:\Program Files\FlightGear 2018.2.2
-set FG_ROOT=C:\Program Files\FlightGear 2018.2.2\data
+cd C:\Program Files\FlightGear 2018.3.2
+set FG_ROOT=C:\Program Files\FlightGear 2018.3.2\data
 
 start .\\bin\fgfs ^
 	--aircraft=ZivkoEdge540 ^
