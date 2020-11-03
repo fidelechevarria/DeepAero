@@ -20,7 +20,7 @@ plane = optim.Model()
 m2ft = 3.28084
 rad2deg = 180/np.pi
 deg2rad = np.pi/180
-turbulence = 0
+iteration = 0
 
 # Set these for each OS (Windows 10 values set here)
 ROLL_AXIS = 0
@@ -42,31 +42,28 @@ angular_range_rudder = 0.25
 # Set update frequency (Hz)
 update_frequency = 60
 
-# # Initialize variables for data recording
-# da = []
-# de = []
-# dr = []
-# dt = []
-# roll = []
-# pitch = []
-# yaw = []
-# posNorth = []
-# posEast = []
-# posDown = []
-# vx = []
-# vy = []
-# vz = []
-# p = []
-# q = []
-# r = []
+# Initialize variables for data recording
+da_buf = []
+de_buf = []
+dr_buf = []
+dt_buf = []
+roll_buf = []
+pitch_buf = []
+yaw_buf = []
+posNorth_buf = []
+posEast_buf = []
+posDown_buf = []
+vx_buf = []
+vy_buf = []
+vz_buf = []
+p_buf = []
+q_buf = []
+r_buf = []
 
-import time
-start = time.time()
 def step():
 
 	# Define global variables
 	global iteration
-	global turbulence
 
 	# Get joystick values
 	pygame.event.pump()
@@ -82,14 +79,23 @@ def step():
 	internals = plane.getInternals()
 	lat = internals[0]
 	lon = internals[1]
+	rotor_rpm = internals[2]
+	vx = internals[3]
+	vy = internals[4]
+	vz = internals[5]
+	posNorth = states[0]
+	posEast = states[1]
 	alt = states[2]
 	pitch = states[3]
 	roll = states[4]
 	yaw = states[5]
-	rotor_rpm = internals[2]
+	p = states[6]
+	q = states[7]
+	r = states[8]
 	da = controls[0]
 	de = controls[1]
 	dr = controls[2]
+	dt = controls[3]
 	array_FG = np.array([lat * rad2deg,
 	                     lon * rad2deg,
 						 alt * m2ft,
@@ -104,36 +110,48 @@ def step():
 	buffer = array_FG.tobytes()
 	sock.sendto(buffer, (UDP_IP, UDP_PORT))  # Send array to FG
 
-	end = time.time()
-	print(start - end)
-
-	# # Fill in data structure
-	# da.append(plane.da)
-	# de.append(plane.de)
-	# dr.append(plane.dr)
-	# dt.append(plane.dt)
-	# roll.append(plane.roll)
-	# pitch.append(plane.pitch)
-	# yaw.append(plane.yaw)
-	# posNorth.append(plane.posNorth)
-	# posEast.append(plane.posEast)
-	# posDown.append(-plane.alt)
-	# vx.append(plane.vx)
-	# vy.append(plane.vy)
-	# vz.append(plane.vz)
-	# p.append(plane.p)
-	# q.append(plane.q)
-	# r.append(plane.r)
+	# Fill in data structure
+	da_buf.append(da)
+	de_buf.append(de)
+	dr_buf.append(dr)
+	dt_buf.append(dt)
+	roll_buf.append(roll)
+	pitch_buf.append(pitch)
+	yaw_buf.append(yaw)
+	posNorth_buf.append(posNorth)
+	posEast_buf.append(posEast)
+	posDown_buf.append(-alt)
+	vx_buf.append(vx)
+	vy_buf.append(vy)
+	vz_buf.append(vz)
+	p_buf.append(p)
+	q_buf.append(q)
+	r_buf.append(r)
 
 	# Update counter
-	# iteration += 1
+	iteration += 1
 
-	# # Save data
-	# if iteration == update_frequency * 20:
-	# 	df = pd.DataFrame({'da': da, 'de': de, 'dr': dr, 'dt': dt, 'roll': roll, 'pitch': pitch, 'yaw': yaw, 'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown, 'vx': vx, 'vy': vy, 'vz': vz, 'p': p, 'q': q, 'r': r})
-	# 	print(df)
-	# 	df.to_csv(path_or_buf='./data.csv')
-	# 	sys.exit(0)
+	# Save data
+	if iteration == update_frequency * 20:
+		df = pd.DataFrame({'da': da_buf,
+		                   'de': de_buf,
+						   'dr': dr_buf,
+						   'dt': dt_buf,
+						   'roll': roll_buf,
+						   'pitch': pitch_buf,
+						   'yaw': yaw_buf,
+						   'posNorth': posNorth_buf,
+						   'posEast': posEast_buf,
+						   'posDown': posDown_buf,
+						   'vx': vx_buf,
+						   'vy': vy_buf,
+						   'vz': vz_buf,
+						   'p': p_buf,
+						   'q': q_buf,
+						   'r': r_buf})
+		print(df)
+		df.to_csv(path_or_buf='./data.csv')
+		sys.exit(0)
 
 
 # Start task scheduler

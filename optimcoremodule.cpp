@@ -53,7 +53,7 @@ static PyObject * PyModel_getStates(PyModel* self, PyObject* args)
     States_t states;
     (self->ptrObj)->getStates(&states);
 
-    return Py_BuildValue("ffffff", states.posNorth, states.posEast, states.alt, states.pitch, states.roll, states.yaw);
+    return Py_BuildValue("fffffffff", states.posNorth, states.posEast, states.alt, states.pitch, states.roll, states.yaw, states.p, states.q, states.r);
 }
 
 static PyObject * PyModel_getControls(PyModel* self, PyObject* args)
@@ -69,7 +69,7 @@ static PyObject * PyModel_getInternals(PyModel* self, PyObject* args)
     Internals_t internals;
     (self->ptrObj)->getInternals(&internals);
 
-    return Py_BuildValue("fff", internals.lat, internals.lon, internals.rotor_rpm);
+    return Py_BuildValue("ffffff", internals.lat, internals.lon, internals.rotor_rpm, internals.vx, internals.vy, internals.vz);
 }
 
 // static PyObject * optimcore_TsipCreatePacket(PyObject *self, PyObject *args)
