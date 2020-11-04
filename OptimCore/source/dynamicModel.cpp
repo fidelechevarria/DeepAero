@@ -3,6 +3,11 @@
 //Constructor
 Model::Model(void)
 {
+    this->init();
+}
+
+void Model::init(void)
+{
     _internals = {0};
     _states = {100, 0, 0, 0, 0, 0, 0, 0, 900};
     _params = {750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100};
@@ -16,8 +21,6 @@ Model::Model(void)
     //Set initial velocities
     _internals.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
     _internals.vz = _internals.vx * term1;
-
-    std::cout << dynamicPressure << std::endl;
 
     //Set internal variables
     _internals.V = sqrtf(_internals.vx * _internals.vx + _internals.vy * _internals.vy + _internals.vz * _internals.vz);
@@ -38,10 +41,6 @@ Model::Model(void)
 
 Model::~Model()
 {
-    for (uint32_t i = 0 ; i < N_samples ; i++)
-    {
-        std::cout << _trajectory[16 * N_samples + i] << std::endl;
-    }
     delete _trajectory;
 }
 
@@ -224,4 +223,28 @@ void Model::loadTrajectory(std::string filePath)
         _trajectory[stateNumber * N_samples + lineNumber] = std::stof(lineString);
         lineNumber++;
     }
+}
+
+float Model::evaluate(void)
+{
+    this->init();
+    float dt = 1.0F / 60.0F;
+    float diffNorth = 0.0F;
+    float diffEast = 0.0F;
+    float diffDown = 0.0F;
+    float fitness = 0.0F;
+    for (uint32_t i = 0 ; i < N_samples ; i++)
+    {
+        Controls_t controls = {_trajectory[1 * N_samples + i],   //da
+                               _trajectory[2 * N_samples + i],   //de
+                               _trajectory[3 * N_samples + i],   //dr
+                               _trajectory[4 * N_samples + i]};  //dt
+        this->propagate(controls, dt);
+        diffNorth = (_states.posNorth - _trajectory[8 * N_samples + i]);
+        diffEast = (_states.posEast - _trajectory[9 * N_samples + i]);
+        diffDown = (-_states.alt - _trajectory[10 * N_samples + i]);
+        fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
+    }
+    fitness /= N_samples;
+    return fitness;
 }
