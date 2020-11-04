@@ -38,7 +38,11 @@ Model::Model(void)
 
 Model::~Model()
 {
-
+    for (uint32_t i = 0 ; i < N_samples ; i++)
+    {
+        std::cout << _trajectory[16 * N_samples + i] << std::endl;
+    }
+    delete _trajectory;
 }
 
 uint16_t Model::propagate(Controls_t controls, float dtime)
@@ -191,3 +195,33 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     return 69;
 }
 
+void Model::loadTrajectory(std::string filePath)
+{
+    std::string lineString;
+    std::ifstream readStream;
+    readStream.open(filePath);
+    std::getline(readStream, lineString); // Reads first line since it is not needed
+    uint16_t lineNumber = 0;
+    for (;;)
+    {
+        lineString.clear();
+        std::getline(readStream, lineString); // Reads next line in file
+        if (lineString.empty())
+        {
+            break;
+        }
+        std::string delimiter = ",";
+        size_t pos = 0;
+        uint16_t stateNumber = 0;
+        std::string token;
+        while ((pos = lineString.find(delimiter)) != std::string::npos)
+        {
+            token = lineString.substr(0, pos); // Extract text from start until first delimiter is found
+            _trajectory[stateNumber * N_samples + lineNumber] = std::stof(token);
+            lineString.erase(0, pos + delimiter.length()); // Delete this section from the string since it has already been parsed
+            stateNumber++;
+        }
+        _trajectory[stateNumber * N_samples + lineNumber] = std::stof(lineString);
+        lineNumber++;
+    }
+}

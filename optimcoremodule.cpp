@@ -48,6 +48,22 @@ static PyObject * PyModel_propagate(PyModel* self, PyObject* args)
     return Py_BuildValue("i", retval);
 }
 
+static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
+{
+    // float da, de, dr, dt, dtime;
+    // uint32_t retval;
+
+    // if (!PyArg_ParseTuple(args, "fffff", &da, &de, &dr, &dt, &dtime))
+    // {
+    //     return NULL;
+    // }
+
+    std::string file ("/home/fidel/repos/DeepAero/data.csv");
+    (self->ptrObj)->loadTrajectory(file);
+
+    return Py_BuildValue("i", 69);
+}
+
 static PyObject * PyModel_getStates(PyModel* self, PyObject* args)
 {
     States_t states;
@@ -193,6 +209,7 @@ static PyMethodDef PyModel_methods[] =
     // {"TsipPendingPacketsRx", optimcore_TsipPendingPacketsRx, METH_VARARGS, "Number of pending packets available to be read with TsipReadPacketRx in the TsipRx_t state machine passed."},
     // {"TsipObtainStatistics", optimcore_TsipObtainStatistics, METH_VARARGS, "Returns data statistics"},
     {"propagate", (PyCFunction)PyModel_propagate, METH_VARARGS, "Propagates model"},
+    {"loadTrajectory", (PyCFunction)PyModel_loadTrajectory, METH_VARARGS, "Loads trajectory"},
     {"getStates", (PyCFunction)PyModel_getStates, METH_VARARGS, "Get states"},
     {"getControls", (PyCFunction)PyModel_getControls, METH_VARARGS, "Get controls"},
     {"getInternals", (PyCFunction)PyModel_getInternals, METH_VARARGS, "Get internals"},
