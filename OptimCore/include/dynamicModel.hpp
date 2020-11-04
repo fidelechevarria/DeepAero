@@ -212,7 +212,7 @@ class Model
         void init(void);
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filepath);
-        float evaluate(void);
+        float evaluate(AeroCoeffs_t aero);
 
         inline void getStates(States_t * states)
         {

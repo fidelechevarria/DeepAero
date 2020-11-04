@@ -225,9 +225,11 @@ void Model::loadTrajectory(std::string filePath)
     }
 }
 
-float Model::evaluate(void)
+float Model::evaluate(AeroCoeffs_t aero)
 {
+    AeroCoeffs_t originalAero = _aero;
     this->init();
+    _aero = aero;
     float dt = 1.0F / 60.0F;
     float diffNorth = 0.0F;
     float diffEast = 0.0F;
@@ -245,6 +247,6 @@ float Model::evaluate(void)
         diffDown = (-_states.alt - _trajectory[10 * N_samples + i]);
         fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
     }
-    fitness /= N_samples;
-    return fitness;
+    _aero = originalAero;
+    return fitness / N_samples;
 }
