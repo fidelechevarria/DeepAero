@@ -13,13 +13,6 @@ typedef struct
 static int PyModel_init(PyModel *self, PyObject *args, PyObject *kwds)
 // initialize PyModel Object
 {
-    // uint32_t fftSize;
-
-    // if (!PyArg_ParseTuple(args, "i", &fftSize))
-    // {
-    //     return -1;
-    // }    
-
     self->ptrObj = new Model();
 
     return 0;
@@ -54,6 +47,23 @@ static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
     (self->ptrObj)->loadTrajectory(file);
 
     return Py_BuildValue("i", 69);
+}
+
+static PyObject * PyModel_getTrajectorySample(PyModel* self, PyObject* args)
+{
+    uint32_t idx;
+
+    if (!PyArg_ParseTuple(args, "i", &idx))
+    {
+        return NULL;
+    }
+
+    float states[17];
+    (self->ptrObj)->getTrajectorySample(states, idx);
+
+    return Py_BuildValue("fffffffffffffffff", states[0], states[1], states[2], states[3], states[4], states[5],
+                                              states[6], states[7], states[8], states[9], states[10], states[11],
+                                              states[12], states[13], states[14], states[15], states[16]);
 }
 
 static PyObject * PyModel_evaluate(PyModel* self, PyObject* args)
@@ -104,112 +114,109 @@ static PyObject * PyModel_getInternals(PyModel* self, PyObject* args)
     return Py_BuildValue("ffffff", internals.lat, internals.lon, internals.rotor_rpm, internals.vx, internals.vy, internals.vz);
 }
 
-// static PyObject * optimcore_TsipCreatePacket(PyObject *self, PyObject *args)
-// {
-//     Py_buffer dst, src;
-//     uint32_t dstcount;
-//     if (!PyArg_ParseTuple(args, "s*s*", &dst, &src))
-//     {
-//         return NULL;
-//     }
-    
-//     if (dst.len >= 11 + 2*src.len) // 1 (DLE) + 2*src.len (ALL DLE's) + 8 (ALL CRC DLE's) + 1 (DLE) + 1 (ETX)
-//     {
-//         dstcount = TsipCreatePacket((uint8_t*)dst.buf, (uint8_t*)src.buf, src.len);
-//     }
-//     else
-//     {
-//         return NULL;
-//     }
+static PyObject * PyModel_getAeroCoeffs(PyModel* self, PyObject* args)
+{
+    AeroCoeffs_t coefs;
+    (self->ptrObj)->getAeroCoeffs(&coefs);
 
-//     return Py_BuildValue("k", dstcount);
-// }
+    return Py_BuildValue("ffffffffffffffffffffffffff",
+                         coefs.Cd0, coefs.K, coefs.Cdb, coefs.Cyb, coefs.Cyda, coefs.Cydr,
+                         coefs.Cyp, coefs.Cyr, coefs.Cl0, coefs.Cla, coefs.Cllb, coefs.Cllda,
+                         coefs.Clldr, coefs.Cllp, coefs.Cllr, coefs.Cmm0, coefs.Cmma, coefs.Cmmda,
+                         coefs.Cmmde, coefs.Cmmdr, coefs.Cmmq, coefs.Cnnb, coefs.Cnnda, coefs.Cnndr,
+                         coefs.Cnnp, coefs.Cnnr);
+}
 
-// static PyObject * optimcore_TsipInitRx(PyObject *self, PyObject *args)
-// {
-//     Py_buffer tsiprx, storageBuffer;
-//     uint32_t maxPacketLength, maxPacketsToHold;
-//     int32_t status;
-//     if (!PyArg_ParseTuple(args, "s*s*II", &tsiprx, &storageBuffer, &maxPacketLength, &maxPacketsToHold))
-//     {
-//         return NULL;
-//     }
+static PyObject * PyModel_setStates(PyModel* self, PyObject* args)
+{
+    float statesRcv[9];
 
-//     status = TsipInitRx((TsipRx_t*)tsiprx.buf, (uint8_t*)storageBuffer.buf, maxPacketLength, maxPacketsToHold);
+    if (!PyArg_ParseTuple(args, "fffffffff",
+                          &statesRcv[0], &statesRcv[1], &statesRcv[2],
+                          &statesRcv[3], &statesRcv[4], &statesRcv[5],
+                          &statesRcv[6], &statesRcv[7], &statesRcv[8]))
+    {
+        return NULL;
+    }
 
-//     return Py_BuildValue("i", status);
-// }
+    States_t states = {statesRcv[0], statesRcv[1], statesRcv[2],
+                       statesRcv[3], statesRcv[4], statesRcv[5],
+                       statesRcv[6], statesRcv[7], statesRcv[8]};
+    (self->ptrObj)->setStates(states);
 
-// static PyObject * optimcore_TsipProcessRawRx(PyObject *self, PyObject *args)
-// {
-//     Py_buffer tsiprx, storageBuffer;
-//     uint32_t storageBufferLength;
-//     int32_t status;
-//     if (!PyArg_ParseTuple(args, "s*s*I", &tsiprx, &storageBuffer, &storageBufferLength))
-//     {
-//         return NULL;
-//     }
+    return Py_BuildValue("i", 0);
+}
 
-//     status = TsipProcessRawRx((TsipRx_t*)tsiprx.buf, (uint8_t*)storageBuffer.buf, storageBufferLength);
+static PyObject * PyModel_setControls(PyModel* self, PyObject* args)
+{
+    float controlsRcv[4];
 
-//     return Py_BuildValue("i", status);
-// }
+    if (!PyArg_ParseTuple(args, "ffff", &controlsRcv[0], &controlsRcv[1], &controlsRcv[2], &controlsRcv[3]))
+    {
+        return NULL;
+    }
 
-// static PyObject * optimcore_TsipReadPacketRx(PyObject *self, PyObject *args)
-// {
-//     Py_buffer tsiprx, storageBuffer;
-//     if (!PyArg_ParseTuple(args, "s*s*", &tsiprx, &storageBuffer))
-//     {
-//         return NULL;
-//     }
+    Controls_t controls = {controlsRcv[0], controlsRcv[1], controlsRcv[2], controlsRcv[3]};
+    (self->ptrObj)->setControls(controls);
 
-//     int64_t packetsize = TsipReadPacketRx((TsipRx_t*)tsiprx.buf, (uint8_t*)storageBuffer.buf);
+    return Py_BuildValue("i", 0);
+}
 
-//     return Py_BuildValue("L", packetsize);
-// }
+static PyObject * PyModel_setInternals(PyModel* self, PyObject* args)
+{
+    float internalsRcv[54];
 
-// static PyObject * optimcore_TsipPendingPacketsRx(PyObject *self, PyObject *args)
-// {
-//     Py_buffer tsiprx;
-//     if (!PyArg_ParseTuple(args, "s*", &tsiprx))
-//     {
-//         return NULL;
-//     }
+    if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                         &internalsRcv[0], &internalsRcv[1], &internalsRcv[2], &internalsRcv[3], &internalsRcv[4], &internalsRcv[5],
+                         &internalsRcv[6], &internalsRcv[7], &internalsRcv[8], &internalsRcv[9], &internalsRcv[10], &internalsRcv[11],
+                         &internalsRcv[12], &internalsRcv[13], &internalsRcv[14], &internalsRcv[15], &internalsRcv[16], &internalsRcv[17],
+                         &internalsRcv[18], &internalsRcv[19], &internalsRcv[20], &internalsRcv[21], &internalsRcv[22], &internalsRcv[23],
+                         &internalsRcv[24], &internalsRcv[25], &internalsRcv[26], &internalsRcv[27], &internalsRcv[28], &internalsRcv[29],
+                         &internalsRcv[30], &internalsRcv[31], &internalsRcv[32], &internalsRcv[33], &internalsRcv[34], &internalsRcv[35],
+                         &internalsRcv[36], &internalsRcv[37], &internalsRcv[38], &internalsRcv[39], &internalsRcv[40], &internalsRcv[41],
+                         &internalsRcv[42], &internalsRcv[43], &internalsRcv[44], &internalsRcv[45], &internalsRcv[46], &internalsRcv[47],
+                         &internalsRcv[48], &internalsRcv[49], &internalsRcv[50], &internalsRcv[51], &internalsRcv[52], &internalsRcv[53]))
+    {
+        return NULL;
+    }
 
-//     uint32_t pendingpackets = TsipPendingPacketsRx((TsipRx_t*)tsiprx.buf);
+    Internals_t internals = {internalsRcv[0], internalsRcv[1], internalsRcv[2], internalsRcv[3], internalsRcv[4], internalsRcv[5],
+                             internalsRcv[6], internalsRcv[7], internalsRcv[8], internalsRcv[9], internalsRcv[10], internalsRcv[11],
+                             internalsRcv[12], internalsRcv[13], internalsRcv[14], internalsRcv[15], internalsRcv[16], internalsRcv[17],
+                             internalsRcv[18], internalsRcv[19], internalsRcv[20], internalsRcv[21], internalsRcv[22], internalsRcv[23],
+                             internalsRcv[24], internalsRcv[25], internalsRcv[26], internalsRcv[27], internalsRcv[28], internalsRcv[29],
+                             internalsRcv[30], internalsRcv[31], internalsRcv[32], internalsRcv[33], internalsRcv[34], internalsRcv[35],
+                             internalsRcv[36], internalsRcv[37], internalsRcv[38], internalsRcv[39], internalsRcv[40], internalsRcv[41],
+                             internalsRcv[42], internalsRcv[43], internalsRcv[44], internalsRcv[45], internalsRcv[46], internalsRcv[47],
+                             internalsRcv[48], internalsRcv[49], internalsRcv[50], internalsRcv[51], internalsRcv[52], internalsRcv[53]};
+    (self->ptrObj)->setInternals(internals);
 
-//     return Py_BuildValue("I", pendingpackets);
-// }
+    return Py_BuildValue("i", 0);
+}
 
-// static PyObject * optimcore_TsipObtainStatistics(PyObject *self, PyObject *args)
-// {
-//     Py_buffer tsiprx;
-//     if (!PyArg_ParseTuple(args, "s*", &tsiprx))
-//     {
-//         return NULL;
-//     }
+static PyObject * PyModel_setAeroCoeffs(PyModel* self, PyObject* args)
+{
+    float aeroRcv[26];
 
-//     uint32_t goodPacketBytesReceived = ((TsipRx_t*)tsiprx.buf)->statistics.goodPacketBytesReceived;
-//     uint32_t badPacketBytesReceived = ((TsipRx_t*)tsiprx.buf)->statistics.badPacketBytesReceived;
-//     uint32_t goodPacketsReceived = ((TsipRx_t*)tsiprx.buf)->statistics.goodPacketsReceived;
-//     uint32_t wrongPacketsReceived = ((TsipRx_t*)tsiprx.buf)->statistics.wrongPacketsReceived;
-//     uint32_t badCrcPacketsReceived = ((TsipRx_t*)tsiprx.buf)->statistics.badCrcPacketsReceived;
-//     uint32_t cutPacketsReceived = ((TsipRx_t*)tsiprx.buf)->statistics.cutPacketsReceived;
-//     uint32_t tooLongPacketsReceived = ((TsipRx_t*)tsiprx.buf)->statistics.tooLongPacketsReceived;
-//     uint32_t tooShortPacketsReceived = ((TsipRx_t*)tsiprx.buf)->statistics.tooShortPacketsReceived;
-//     uint32_t overwrittenPackets = ((TsipRx_t*)tsiprx.buf)->statistics.overwrittenPackets;
+    if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffff",
+                         &aeroRcv[0], &aeroRcv[1], &aeroRcv[2], &aeroRcv[3], &aeroRcv[4], &aeroRcv[5],
+                         &aeroRcv[6], &aeroRcv[7], &aeroRcv[8], &aeroRcv[9], &aeroRcv[10], &aeroRcv[11],
+                         &aeroRcv[12], &aeroRcv[13], &aeroRcv[14], &aeroRcv[15], &aeroRcv[16], &aeroRcv[17],
+                         &aeroRcv[18], &aeroRcv[19], &aeroRcv[20], &aeroRcv[21], &aeroRcv[22], &aeroRcv[23],
+                         &aeroRcv[24], &aeroRcv[25]))
+    {
+        return NULL;
+    }
 
-//     return Py_BuildValue("IIIIIIIII", 
-//                          goodPacketBytesReceived,
-//                          badPacketBytesReceived,
-//                          goodPacketsReceived,
-//                          wrongPacketsReceived,
-//                          badCrcPacketsReceived,
-//                          cutPacketsReceived,
-//                          tooLongPacketsReceived,
-//                          tooShortPacketsReceived,
-//                          overwrittenPackets);
-// }
+    AeroCoeffs_t aero = {aeroRcv[0], aeroRcv[1], aeroRcv[2], aeroRcv[3], aeroRcv[4], aeroRcv[5],
+                         aeroRcv[6], aeroRcv[7], aeroRcv[8], aeroRcv[9], aeroRcv[10], aeroRcv[11],
+                         aeroRcv[12], aeroRcv[13], aeroRcv[14], aeroRcv[15], aeroRcv[16], aeroRcv[17],
+                         aeroRcv[18], aeroRcv[19], aeroRcv[20], aeroRcv[21], aeroRcv[22], aeroRcv[23],
+                         aeroRcv[24], aeroRcv[25]};
+    (self->ptrObj)->setAeroCoeffs(aero);
+
+    return Py_BuildValue("i", 0);
+}
 
 static PyObject * optimcore_GetStatesSize(PyObject *self, PyObject *args)
 {
@@ -218,18 +225,18 @@ static PyObject * optimcore_GetStatesSize(PyObject *self, PyObject *args)
 
 static PyMethodDef PyModel_methods[] = 
 {
-    // {"TsipCreatePacket", optimcore_TsipCreatePacket, METH_VARARGS, "Create TSIP packet from data: CRC, DLE/ETX fields and escaped DLEs are inserted."},
-    // {"TsipInitRx", optimcore_TsipInitRx, METH_VARARGS, "Initialize TsipRx_t state machine and data structures."},
-    // {"TsipProcessRawRx", optimcore_TsipProcessRawRx, METH_VARARGS, "Process raw TSIP data and save packets to internal circular FIFO."},
-    // {"TsipReadPacketRx", optimcore_TsipReadPacketRx, METH_VARARGS, "Read received TSIP packet content, including ID and Payload."},
-    // {"TsipPendingPacketsRx", optimcore_TsipPendingPacketsRx, METH_VARARGS, "Number of pending packets available to be read with TsipReadPacketRx in the TsipRx_t state machine passed."},
-    // {"TsipObtainStatistics", optimcore_TsipObtainStatistics, METH_VARARGS, "Returns data statistics"},
     {"propagate", (PyCFunction)PyModel_propagate, METH_VARARGS, "Propagates model"},
     {"loadTrajectory", (PyCFunction)PyModel_loadTrajectory, METH_VARARGS, "Loads trajectory"},
+    {"getTrajectorySample", (PyCFunction)PyModel_getTrajectorySample, METH_VARARGS, "Gets trajectory sample"},
     {"evaluate", (PyCFunction)PyModel_evaluate, METH_VARARGS, "Evaluate"},
     {"getStates", (PyCFunction)PyModel_getStates, METH_VARARGS, "Get states"},
     {"getControls", (PyCFunction)PyModel_getControls, METH_VARARGS, "Get controls"},
     {"getInternals", (PyCFunction)PyModel_getInternals, METH_VARARGS, "Get internals"},
+    {"getAeroCoeffs", (PyCFunction)PyModel_getAeroCoeffs, METH_VARARGS, "Get aerodynamic coefficients"},
+    {"setStates", (PyCFunction)PyModel_setStates, METH_VARARGS, "Set states"},
+    {"setControls", (PyCFunction)PyModel_setControls, METH_VARARGS, "Set controls"},
+    {"setInternals", (PyCFunction)PyModel_setInternals, METH_VARARGS, "Set internals"},
+    {"setAeroCoeffs", (PyCFunction)PyModel_setAeroCoeffs, METH_VARARGS, "Set aerodynamic coefficients"},
     {"GetStatesSize", (PyCFunction)optimcore_GetStatesSize, METH_VARARGS, "Gets states size"},
     {NULL}  /* Sentinel */
 };

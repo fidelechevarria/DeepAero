@@ -225,6 +225,14 @@ void Model::loadTrajectory(std::string filePath)
     }
 }
 
+void Model::getTrajectorySample(float * buf, uint32_t idx)
+{
+    for (uint16_t i = 0 ; i < N_states ; i++)
+    {
+        buf[i] = _trajectory[i * N_samples + idx];
+    }
+}
+
 float Model::evaluate(AeroCoeffs_t aero)
 {
     AeroCoeffs_t originalAero = _aero;

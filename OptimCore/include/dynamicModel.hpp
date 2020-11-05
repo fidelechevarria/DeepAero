@@ -212,6 +212,7 @@ class Model
         void init(void);
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filepath);
+        void getTrajectorySample(float * buf, uint32_t idx);
         float evaluate(AeroCoeffs_t aero);
 
         inline void getStates(States_t * states)
@@ -227,6 +228,31 @@ class Model
         inline void getInternals(Internals_t * internals)
         {
             internals[0] = _internals;
+        }
+
+        inline void getAeroCoeffs(AeroCoeffs_t * aero)
+        {
+            aero[0] = _aero;
+        }
+
+        inline void setStates(const States_t states)
+        {
+            _states = states;
+        }
+
+        inline void setControls(const Controls_t controls)
+        {
+            _controls = controls;
+        }
+
+        inline void setInternals(const Internals_t internals)
+        {
+            _internals = internals;
+        }
+
+        inline void setAeroCoeffs(const AeroCoeffs_t aero)
+        {
+            _aero = aero;
         }
 
     private:
