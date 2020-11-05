@@ -12,10 +12,7 @@ BASIN_HOPPING = 4
 model = optim.Model()
 model.loadTrajectory()
 
-vismodel = optim.Model()
-vismodel.loadTrajectory()
-
-optimizer = GRADIENT
+optimizer = DIFFERENTIAL
 
 def fitness(aero):
     return model.evaluate(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8], aero[9],
@@ -30,6 +27,8 @@ def callback(xk, convergence):
 
 period = 1.0 / 60.0 
 def getTrajectory(aero):
+    vismodel = optim.Model()
+    vismodel.loadTrajectory()
     vismodel.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
                            aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
                            aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
@@ -82,4 +81,4 @@ def optimize():
     print(f'Number of function evaluations: {result["nfev"]}')
     print(f'Cause of termination: {result["message"]}')
 
-    return getTrajectory(result["x"])
+    return getTrajectory(result["x"]), getTrajectory(defaultAero)
