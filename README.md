@@ -1,7 +1,1 @@
-- TODO: Pasar el modelo dinámico y el generador de trayectorias a C y hacer el wrapper del compilado con distutils.
-- TODO: ¿Dejar controles, fuerzas, momentos como inputs?
-- TODO: Se puede quitar el tiempo ya que se hará todo el análisis a una frecuencia determinada.
-- TODO: Crear método de visualización de la trayectoria real VS trayectoria estimada.
-- TODO: Reordenar los datos de vuelo en 2D (Nº timestamps, 1, Nº variables).
-- TODO: Aplicar una red convolucional bidimensional con distintos kernels.
-- TODO: Incorporar un controlador para evitar inestabilidades.
+CMA-ES.github.io
