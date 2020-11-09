@@ -46,21 +46,10 @@ def getTrajectory(aero):
 
 def optimize():
     defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
-    x0 = [element * (np.random.rand() + 0.5) for element in defaultAero]
-    bounds = [(element * 0.5, element * 1.5) if element > 0 else (element * 1.5, element * 0.5) for element in defaultAero]
-    for idx in range(len(bounds)):
-        if bounds[idx] == (0, 0):
-            bounds[idx] = (-0.5, 0.5)
-            x0[idx] = np.random.rand() * 0.5
-            
-    # lower = np.array([element[0] for element in bounds])
-    # upper = np.array([element[1] for element in bounds])
-    # print((lower < upper))
-
+    x0 = [0.1, 0.01, 0.2, -0.5, 0, 0.2, 0, 0.4, 0.1, 6, 0, -0.3, 0, -1, 0.1, 0, -1, 0, -1, 0, -5, 0.2, 0, 0, 0, -0.2]
     es = cma.CMAEvolutionStrategy(x0, 0.2)
     es.optimize(fitness)
     res = es.result
-
     return getTrajectory(res[0]), getTrajectory(defaultAero)
 
 if __name__ == "__main__":

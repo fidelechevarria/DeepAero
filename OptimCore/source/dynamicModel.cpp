@@ -239,9 +239,8 @@ float Model::evaluate(AeroCoeffs_t aero)
     this->init();
     _aero = aero;
     float dt = 1.0F / 60.0F;
-    float diffNorth = 0.0F;
-    float diffEast = 0.0F;
-    float diffDown = 0.0F;
+    float diffNorth, diffEast, diffDown = 0.0F;
+    float diffp, diffq, diffr = 0.0F;
     float fitness = 0.0F;
     for (uint32_t i = 0 ; i < N_samples ; i++)
     {
@@ -253,7 +252,11 @@ float Model::evaluate(AeroCoeffs_t aero)
         diffNorth = (_states.posNorth - _trajectory[8 * N_samples + i]);
         diffEast = (_states.posEast - _trajectory[9 * N_samples + i]);
         diffDown = (-_states.alt - _trajectory[10 * N_samples + i]);
+        diffp = (_states.p - _trajectory[14 * N_samples + i]);
+        diffq = (_states.q - _trajectory[15 * N_samples + i]);
+        diffr = (_states.r - _trajectory[16 * N_samples + i]);
         fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
+        fitness += sqrtf(diffp * diffp + diffq * diffq + diffr * diffr) * RAD2DEG;
     }
     _aero = originalAero;
     return fitness / N_samples;
