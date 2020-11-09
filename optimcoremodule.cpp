@@ -95,7 +95,10 @@ static PyObject * PyModel_getStates(PyModel* self, PyObject* args)
     States_t states;
     (self->ptrObj)->getStates(&states);
 
-    return Py_BuildValue("fffffffff", states.posNorth, states.posEast, states.alt, states.pitch, states.roll, states.yaw, states.p, states.q, states.r);
+    return Py_BuildValue("ffffffffffff", states.posNorth, states.posEast, states.alt,
+                                         states.pitch, states.roll, states.yaw,
+                                         states.p, states.q, states.r,
+                                         states.vx, states.vy, states.vz);
 }
 
 static PyObject * PyModel_getControls(PyModel* self, PyObject* args)
@@ -111,7 +114,7 @@ static PyObject * PyModel_getInternals(PyModel* self, PyObject* args)
     Internals_t internals;
     (self->ptrObj)->getInternals(&internals);
 
-    return Py_BuildValue("ffffff", internals.lat, internals.lon, internals.rotor_rpm, internals.vx, internals.vy, internals.vz);
+    return Py_BuildValue("ffffff", internals.lat, internals.lon, internals.rotor_rpm);
 }
 
 static PyObject * PyModel_getAeroCoeffs(PyModel* self, PyObject* args)
@@ -129,19 +132,21 @@ static PyObject * PyModel_getAeroCoeffs(PyModel* self, PyObject* args)
 
 static PyObject * PyModel_setStates(PyModel* self, PyObject* args)
 {
-    float statesRcv[9];
+    float statesRcv[12];
 
-    if (!PyArg_ParseTuple(args, "fffffffff",
+    if (!PyArg_ParseTuple(args, "ffffffffffff",
                           &statesRcv[0], &statesRcv[1], &statesRcv[2],
                           &statesRcv[3], &statesRcv[4], &statesRcv[5],
-                          &statesRcv[6], &statesRcv[7], &statesRcv[8]))
+                          &statesRcv[6], &statesRcv[7], &statesRcv[8],
+                          &statesRcv[9], &statesRcv[10], &statesRcv[11]))
     {
         return NULL;
     }
 
     States_t states = {statesRcv[0], statesRcv[1], statesRcv[2],
                        statesRcv[3], statesRcv[4], statesRcv[5],
-                       statesRcv[6], statesRcv[7], statesRcv[8]};
+                       statesRcv[6], statesRcv[7], statesRcv[8],
+                       statesRcv[9], statesRcv[10], statesRcv[11]};
     (self->ptrObj)->setStates(states);
 
     return Py_BuildValue("i", 0);
@@ -164,7 +169,7 @@ static PyObject * PyModel_setControls(PyModel* self, PyObject* args)
 
 static PyObject * PyModel_setInternals(PyModel* self, PyObject* args)
 {
-    float internalsRcv[54];
+    float internalsRcv[51];
 
     if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                          &internalsRcv[0], &internalsRcv[1], &internalsRcv[2], &internalsRcv[3], &internalsRcv[4], &internalsRcv[5],
@@ -175,7 +180,7 @@ static PyObject * PyModel_setInternals(PyModel* self, PyObject* args)
                          &internalsRcv[30], &internalsRcv[31], &internalsRcv[32], &internalsRcv[33], &internalsRcv[34], &internalsRcv[35],
                          &internalsRcv[36], &internalsRcv[37], &internalsRcv[38], &internalsRcv[39], &internalsRcv[40], &internalsRcv[41],
                          &internalsRcv[42], &internalsRcv[43], &internalsRcv[44], &internalsRcv[45], &internalsRcv[46], &internalsRcv[47],
-                         &internalsRcv[48], &internalsRcv[49], &internalsRcv[50], &internalsRcv[51], &internalsRcv[52], &internalsRcv[53]))
+                         &internalsRcv[48], &internalsRcv[49], &internalsRcv[50]))
     {
         return NULL;
     }
@@ -188,7 +193,7 @@ static PyObject * PyModel_setInternals(PyModel* self, PyObject* args)
                              internalsRcv[30], internalsRcv[31], internalsRcv[32], internalsRcv[33], internalsRcv[34], internalsRcv[35],
                              internalsRcv[36], internalsRcv[37], internalsRcv[38], internalsRcv[39], internalsRcv[40], internalsRcv[41],
                              internalsRcv[42], internalsRcv[43], internalsRcv[44], internalsRcv[45], internalsRcv[46], internalsRcv[47],
-                             internalsRcv[48], internalsRcv[49], internalsRcv[50], internalsRcv[51], internalsRcv[52], internalsRcv[53]};
+                             internalsRcv[48], internalsRcv[49], internalsRcv[50]};
     (self->ptrObj)->setInternals(internals);
 
     return Py_BuildValue("i", 0);

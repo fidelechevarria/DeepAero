@@ -9,7 +9,7 @@ Model::Model(void)
 void Model::init(void)
 {
     _internals = {0};
-    _states = {100, 0, 0, 0, 0, 0, 0, 0, 900};
+    _states = {0, 0, 0, 0, 0, 0, 0, 0, 900, 0, 0, 0};
     _params = {750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100};
     _aero = {0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265};
     _controls = {0, 0, 0, 0};
@@ -19,19 +19,19 @@ void Model::init(void)
     float term1 = tanf((((_params.m * _params.g) / (dynamicPressure * _params.S)) - _aero.Cl0) / _aero.Cla + _params.incidence);
 
     //Set initial velocities
-    _internals.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
-    _internals.vz = _internals.vx * term1;
+    _states.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
+    _states.vz = _states.vx * term1;
 
     //Set internal variables
-    _internals.V = sqrtf(_internals.vx * _internals.vx + _internals.vy * _internals.vy + _internals.vz * _internals.vz);
-    _internals.alpha = atan2f(_internals.vz, _internals.vx) - _params.incidence;
-    _internals.beta = asinf(_internals.vy / _internals.V);
+    _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
+    _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
+    _internals.beta = asinf(_states.vy / _internals.V);
     _internals.lon = -3.574605617 * DEG2RAD;  //Madrid Barajas Airport (LEMD)
     _internals.lat = 40.49187427 * DEG2RAD;
     _internals.Xt = _params.Tmax * _controls.dt;
 
     //Set initial states
-    _states.pitch = _internals.alpha + _params.incidence;  //Same as np.arctan2(_internals.vz, _internals.vx)
+    _states.pitch = _internals.alpha + _params.incidence;  //Same as np.arctan2(_states.vz, _states.vx)
 
     //Set wind
     _internals.windNorth = _params.windVelocity * cosf(_params.windElevation) * cosf(_params.windHeading);
@@ -130,9 +130,9 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     _internals.rotor_rpm = _internals.Xt * 400 / _params.Tmax;
 
     //Linear accelerations in body-axes
-    _internals.vx_dot = _states.r * _internals.vy - _states.q * _internals.vz - _params.g * sp + (_internals.Xa + _internals.Xt)/_params.m;
-    _internals.vy_dot = -_states.r * _internals.vx + _states.p * _internals.vz + _params.g * sr * cp + _internals.Ya / _params.m;
-    _internals.vz_dot = _states.q * _internals.vx - _states.p * _internals.vy + _params.g * cr * cp + _internals.Za / _params.m;
+    _internals.vx_dot = _states.r * _states.vy - _states.q * _states.vz - _params.g * sp + (_internals.Xa + _internals.Xt)/_params.m;
+    _internals.vy_dot = -_states.r * _states.vx + _states.p * _states.vz + _params.g * sr * cp + _internals.Ya / _params.m;
+    _internals.vz_dot = _states.q * _states.vx - _states.p * _states.vy + _params.g * cr * cp + _internals.Za / _params.m;
 
     //Euler rates
     _internals.roll_dot = _states.p + tp * (_states.q * sr + _states.r * cr);
@@ -146,14 +146,14 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     _internals.r_dot = (((_params.Ix - _params.Iy) * _params.Ix + _params.Ixz * _params.Ixz) * _states.p * _states.q - _params.Ixz * (_params.Ix - _params.Iy + _params.Iz) * _states.q * _states.r + _params.Ixz * _internals.LL + _params.Ix * _internals.NN) / aux;
 
     //Linear velocities in NED axes
-    _internals.posNorth_dot = _internals.vx * cp * cy + _internals.vy * (-cr * sy + sr * sp * cy) + _internals.vz * (sr * sy + cr * sp * cy);
-    _internals.posEast_dot = _internals.vx * cp * sy + _internals.vy * (cr * cy + sr * sp * sy) + _internals.vz * (-sr * cy + cr * sp * sy);
-    _internals.alt_dot = _internals.vx * sp - _internals.vy * sr * cp - _internals.vz * cr * cp;
+    _internals.posNorth_dot = _states.vx * cp * cy + _states.vy * (-cr * sy + sr * sp * cy) + _states.vz * (sr * sy + cr * sp * cy);
+    _internals.posEast_dot = _states.vx * cp * sy + _states.vy * (cr * cy + sr * sp * sy) + _states.vz * (-sr * cy + cr * sp * sy);
+    _internals.alt_dot = _states.vx * sp - _states.vy * sr * cp - _states.vz * cr * cp;
 
     //Propagate states
-    _internals.vx += _internals.vx_dot * dtime;
-    _internals.vy += _internals.vy_dot * dtime;
-    _internals.vz += _internals.vz_dot * dtime;
+    _states.vx += _internals.vx_dot * dtime;
+    _states.vy += _internals.vy_dot * dtime;
+    _states.vz += _internals.vz_dot * dtime;
     _states.roll += _internals.roll_dot * dtime;
     _states.pitch += _internals.pitch_dot * dtime;
     _states.yaw += _internals.yaw_dot * dtime;
@@ -173,7 +173,7 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     _internals.lat += atan2f(1, RM) * _internals.posNorth_dot * dtime;
 
     //Real velocity
-    _internals.V = sqrtf(_internals.vx * _internals.vx + _internals.vy * _internals.vy + _internals.vz * _internals.vz);
+    _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
     
     //True Airspeed
     _internals.TAS_North = _internals.posNorth_dot - _internals.windNorth;
@@ -240,6 +240,7 @@ float Model::evaluate(AeroCoeffs_t aero)
     _aero = aero;
     float dt = 1.0F / 60.0F;
     float diffNorth, diffEast, diffDown = 0.0F;
+    float diffVx, diffVy, diffVz = 0.0F;
     float diffp, diffq, diffr = 0.0F;
     float fitness = 0.0F;
     for (uint32_t i = 0 ; i < N_samples ; i++)
@@ -252,10 +253,14 @@ float Model::evaluate(AeroCoeffs_t aero)
         diffNorth = (_states.posNorth - _trajectory[8 * N_samples + i]);
         diffEast = (_states.posEast - _trajectory[9 * N_samples + i]);
         diffDown = (-_states.alt - _trajectory[10 * N_samples + i]);
+        diffVx = (_states.vx - _trajectory[11 * N_samples + i]);
+        diffVy = (_states.vy - _trajectory[12 * N_samples + i]);
+        diffVz = (_states.vz - _trajectory[13 * N_samples + i]);
         diffp = (_states.p - _trajectory[14 * N_samples + i]);
         diffq = (_states.q - _trajectory[15 * N_samples + i]);
         diffr = (_states.r - _trajectory[16 * N_samples + i]);
         fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
+        fitness += sqrtf(diffVx * diffVx + diffVy * diffVy + diffVz * diffVz);
         fitness += sqrtf(diffp * diffp + diffq * diffq + diffr * diffr) * RAD2DEG;
     }
     _aero = originalAero;

@@ -131,9 +131,6 @@ typedef struct
     float de;                 /*!<  */
     float dr;                 /*!<  */
     float dt;                 /*!<  */
-    float vx;                 /*!<  */
-    float vy;                 /*!<  */
-    float vz;                 /*!<  */
     float V;                  /*!<  */
     float alpha;              /*!<  */
     float beta;               /*!<  */
@@ -197,6 +194,9 @@ typedef struct
     float posNorth;  /*!<  */
     float posEast;   /*!<  */
     float alt;       /*!<  */
+    float vx;        /*!<  */
+    float vy;        /*!<  */
+    float vz;        /*!<  */
 } States_t;
 
 /*----------------------------------------------------------------------------
