@@ -12,11 +12,16 @@ import pandas as pd
 import base64
 import datetime
 import io
-import optimize_cpp_cmaes
+from optimize_cpp_cmaes import Optimizer
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+traj_data = pd.DataFrame()
+traj_filepath = ""
+
+optimizer = Optimizer()
 
 app.layout = html.Div(children=[
     html.H3(children='DeepAero'),
@@ -67,17 +72,18 @@ app.layout = html.Div(children=[
 ])
 
 def parse_contents(contents, filename):
+    global traj_data, traj_filepath
+    traj_filepath = "/home/fidel/repos/DeepAero/" + filename
     content_type, content_string = contents.split(',')
-
     decoded = base64.b64decode(content_string)
     try:
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')))
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
+        traj_data = df # Store dataset in global variable traj_data
     except Exception as e:
         print(e)
         return html.Div([
@@ -109,12 +115,14 @@ def load_data(contents, name):
 
 @app.callback(
     dash.dependencies.Output('3Dtraj', 'figure'),
-    [dash.dependencies.Input('optimize-button', 'n_clicks')],
+    [dash.dependencies.Input('optimize-button', 'n_clicks'),
+    dash.dependencies.Input('output-data-upload', 'children')],
     [dash.dependencies.State('3Dtraj', 'figure')])
-def run_optimization(n_clicks, current_fig):
+def run_optimization(n_clicks, contents, current_fig):
+    global traj_data, traj_filepath
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'optimize-button' in changed_id:
-        df_optim, df_real = optimize_cpp_cmaes.optimize()
+        df_optim, df_real = optimizer.optimize(traj_filepath)
         fig = go.Figure()
         fig.add_trace(
             go.Scatter3d(
@@ -134,6 +142,25 @@ def run_optimization(n_clicks, current_fig):
                 x=df_real['north'],
                 y=df_real['east'],
                 z=-df_real['down'],
+                mode='lines',
+                line={"color": 'red'},
+                legendgroup=1,
+                hovertext="Real",
+                showlegend=True,
+                name="Real"
+            )
+        )
+        fig.update_layout(
+            margin=dict(l=25, r=25, t=25, b=25),
+            paper_bgcolor="White",
+        )
+    elif 'output-data-upload' in changed_id and not traj_data.empty:
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter3d(
+                x=traj_data['posNorth'],
+                y=traj_data['posEast'],
+                z=-traj_data['posDown'],
                 mode='lines',
                 line={"color": 'red'},
                 legendgroup=1,
