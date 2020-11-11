@@ -43,8 +43,14 @@ static PyObject * PyModel_propagate(PyModel* self, PyObject* args)
 
 static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
 {
-    std::string file ("/home/fidel/repos/DeepAero/data.csv");
-    (self->ptrObj)->loadTrajectory(file);
+    char * file;
+    
+    if (!PyArg_ParseTuple(args, "s", &file))
+    {
+        return NULL;
+    }
+
+    (self->ptrObj)->loadTrajectory((std::string)file);
 
     return Py_BuildValue("i", 69);
 }
