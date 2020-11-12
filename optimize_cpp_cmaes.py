@@ -38,7 +38,7 @@ class Optimizer():
             posNorth.append(states[0])
             posEast.append(states[1])
             posDown.append(-states[2])
-        return pd.DataFrame({'north': posNorth, 'east': posEast, 'down': posDown})
+        return pd.DataFrame({'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown})
 
     def optimize(self, trajFile):
         self.model.loadTrajectory(trajFile)

@@ -8,6 +8,7 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import pandas as pd
 import base64
 import datetime
@@ -68,7 +69,16 @@ app.layout = html.Div(children=[
         style={
             'width': '600px'
         }
-    )
+    ),
+
+    dcc.Graph(
+        id='2Dtraj',
+        figure=make_subplots(rows=9, cols=1),
+        style={
+            # 'width': '800px',
+            # 'height': '1200px',
+        }
+    ),
 ])
 
 def parse_contents(contents, filename):
@@ -114,21 +124,23 @@ def load_data(contents, name):
         return parse_contents(contents, name)
 
 @app.callback(
-    dash.dependencies.Output('3Dtraj', 'figure'),
+    [dash.dependencies.Output('3Dtraj', 'figure'),
+    dash.dependencies.Output('2Dtraj', 'figure'),],
     [dash.dependencies.Input('optimize-button', 'n_clicks'),
     dash.dependencies.Input('output-data-upload', 'children')],
-    [dash.dependencies.State('3Dtraj', 'figure')])
-def run_optimization(n_clicks, contents, current_fig):
+    [dash.dependencies.State('3Dtraj', 'figure'),
+    dash.dependencies.State('2Dtraj', 'figure')])
+def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
     global traj_data, traj_filepath
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'optimize-button' in changed_id:
         df_optim, df_real = optimizer.optimize(traj_filepath)
-        fig = go.Figure()
-        fig.add_trace(
+        fig_3D = go.Figure()
+        fig_3D.add_trace(
             go.Scatter3d(
-                x=df_optim['north'],
-                y=df_optim['east'],
-                z=-df_optim['down'],
+                x=df_optim['posNorth'],
+                y=df_optim['posEast'],
+                z=-df_optim['posDown'],
                 mode='lines',
                 line={"color": 'blue'},
                 legendgroup=1,
@@ -137,11 +149,11 @@ def run_optimization(n_clicks, contents, current_fig):
                 name="Optimized"
             )
         )
-        fig.add_trace(
+        fig_3D.add_trace(
             go.Scatter3d(
-                x=df_real['north'],
-                y=df_real['east'],
-                z=-df_real['down'],
+                x=df_real['posNorth'],
+                y=df_real['posEast'],
+                z=-df_real['posDown'],
                 mode='lines',
                 line={"color": 'red'},
                 legendgroup=1,
@@ -150,13 +162,26 @@ def run_optimization(n_clicks, contents, current_fig):
                 name="Real"
             )
         )
-        fig.update_layout(
+        fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
             paper_bgcolor="White",
         )
+        fig_2D = make_subplots(rows=9, cols=1, 
+                    shared_xaxes=True, 
+                    vertical_spacing=0.02)
+        fig_2D.add_trace(go.Scatter(name='roll', y=traj_data['roll']), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch', y=traj_data['pitch']), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw', y=traj_data['yaw']), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx', y=traj_data['vx']), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy', y=traj_data['vy']), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz', y=traj_data['vz']), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='p', y=traj_data['p']), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='q', y=traj_data['q']), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='r', y=traj_data['r']), row=9, col=1)
+        fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
     elif 'output-data-upload' in changed_id and not traj_data.empty:
-        fig = go.Figure()
-        fig.add_trace(
+        fig_3D = go.Figure()
+        fig_3D.add_trace(
             go.Scatter3d(
                 x=traj_data['posNorth'],
                 y=traj_data['posEast'],
@@ -169,13 +194,27 @@ def run_optimization(n_clicks, contents, current_fig):
                 name="Real"
             )
         )
-        fig.update_layout(
+        fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
             paper_bgcolor="White",
         )
+        fig_2D = make_subplots(rows=9, cols=1, 
+                    shared_xaxes=True, 
+                    vertical_spacing=0.02)
+        fig_2D.add_trace(go.Scatter(name='roll', y=traj_data['roll']), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch', y=traj_data['pitch']), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw', y=traj_data['yaw']), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx', y=traj_data['vx']), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy', y=traj_data['vy']), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz', y=traj_data['vz']), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='p', y=traj_data['p']), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='q', y=traj_data['q']), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='r', y=traj_data['r']), row=9, col=1)
+        fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
     else:
-        fig = current_fig
-    return fig
+        fig_3D = current_fig_3D
+        fig_2D = current_fig_2D
+    return fig_3D, fig_2D
 
 if __name__ == '__main__':
     app.run_server(debug=True)
