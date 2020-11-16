@@ -14,6 +14,9 @@ import base64
 import datetime
 import io
 from optimize_cpp_cmaes import Optimizer
+import plotly.express as px
+
+colorseq = px.colors.qualitative.Plotly
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -138,19 +141,6 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_3D = go.Figure()
         fig_3D.add_trace(
             go.Scatter3d(
-                x=df_optim['posNorth'],
-                y=df_optim['posEast'],
-                z=-df_optim['posDown'],
-                mode='lines',
-                line={"color": 'blue'},
-                legendgroup=1,
-                hovertext="Optim",
-                showlegend=True,
-                name="Optimized"
-            )
-        )
-        fig_3D.add_trace(
-            go.Scatter3d(
                 x=df_real['posNorth'],
                 y=df_real['posEast'],
                 z=-df_real['posDown'],
@@ -162,6 +152,19 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
                 name="Real"
             )
         )
+        fig_3D.add_trace(
+            go.Scatter3d(
+                x=df_optim['posNorth'],
+                y=df_optim['posEast'],
+                z=-df_optim['posDown'],
+                mode='lines',
+                line={"color": 'blue'},
+                legendgroup=1,
+                hovertext="Optim",
+                showlegend=True,
+                name="Optimized"
+            )
+        )
         fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
             paper_bgcolor="White",
@@ -169,24 +172,24 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 
                     vertical_spacing=0.02)
-        fig_2D.add_trace(go.Scatter(name='roll_optim', y=df_optim['roll']), row=1, col=1)
-        fig_2D.add_trace(go.Scatter(name='roll_real', y=df_real['roll']), row=1, col=1)
-        fig_2D.add_trace(go.Scatter(name='pitch_optim', y=df_optim['pitch']), row=2, col=1)
-        fig_2D.add_trace(go.Scatter(name='pitch_real', y=df_real['pitch']), row=2, col=1)
-        fig_2D.add_trace(go.Scatter(name='yaw_optim', y=df_optim['yaw']), row=3, col=1)
-        fig_2D.add_trace(go.Scatter(name='yaw_real', y=df_real['yaw']), row=3, col=1)
-        fig_2D.add_trace(go.Scatter(name='vx_optim', y=df_optim['vx']), row=4, col=1)
-        fig_2D.add_trace(go.Scatter(name='vx_real', y=df_real['vx']), row=4, col=1)
-        fig_2D.add_trace(go.Scatter(name='vy_optim', y=df_optim['vy']), row=5, col=1)
-        fig_2D.add_trace(go.Scatter(name='vy_real', y=df_real['vy']), row=5, col=1)
-        fig_2D.add_trace(go.Scatter(name='vz_optim', y=df_optim['vz']), row=6, col=1)
-        fig_2D.add_trace(go.Scatter(name='vz_real', y=df_real['vz']), row=6, col=1)
-        fig_2D.add_trace(go.Scatter(name='p_optim', y=df_optim['p']), row=7, col=1)
-        fig_2D.add_trace(go.Scatter(name='p_real', y=df_real['p']), row=7, col=1)
-        fig_2D.add_trace(go.Scatter(name='q_optim', y=df_optim['q']), row=8, col=1)
-        fig_2D.add_trace(go.Scatter(name='q_real', y=df_real['q']), row=8, col=1)
-        fig_2D.add_trace(go.Scatter(name='r_optim', y=df_optim['r']), row=9, col=1)
-        fig_2D.add_trace(go.Scatter(name='r_real', y=df_real['r']), row=9, col=1)
+        fig_2D.add_trace(go.Scatter(name='roll_real', y=df_real['roll'], line=dict(shape='linear', color=colorseq[0], dash='solid'), opacity=1), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='roll_optim', y=df_optim['roll'], line=dict(shape='linear', color=colorseq[0], dash='solid'), opacity=0.5), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch_real', y=df_real['pitch'], line=dict(shape='linear', color=colorseq[1], dash='solid'), opacity=1), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch_optim', y=df_optim['pitch'], line=dict(shape='linear', color=colorseq[1], dash='solid'), opacity=0.5), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw_real', y=df_real['yaw'], line=dict(shape='linear', color=colorseq[2], dash='solid'), opacity=1), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw_optim', y=df_optim['yaw'], line=dict(shape='linear', color=colorseq[2], dash='solid'), opacity=0.5), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx_real', y=df_real['vx'], line=dict(shape='linear', color=colorseq[3], dash='solid'), opacity=1), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx_optim', y=df_optim['vx'], line=dict(shape='linear', color=colorseq[3], dash='solid'), opacity=0.5), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy_real', y=df_real['vy'], line=dict(shape='linear', color=colorseq[4], dash='solid'), opacity=1), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy_optim', y=df_optim['vy'], line=dict(shape='linear', color=colorseq[4], dash='solid'), opacity=0.5), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz_real', y=df_real['vz'], line=dict(shape='linear', color=colorseq[5], dash='solid'), opacity=1), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz_optim', y=df_optim['vz'], line=dict(shape='linear', color=colorseq[5], dash='solid'), opacity=0.5), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='p_real', y=df_real['p'], line=dict(shape='linear', color=colorseq[6], dash='solid'), opacity=1), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='p_optim', y=df_optim['p'], line=dict(shape='linear', color=colorseq[6], dash='solid'), opacity=0.5), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='q_real', y=df_real['q'], line=dict(shape='linear', color=colorseq[7], dash='solid'), opacity=1), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='q_optim', y=df_optim['q'], line=dict(shape='linear', color=colorseq[7], dash='solid'), opacity=0.5), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='r_real', y=df_real['r'], line=dict(shape='linear', color=colorseq[8], dash='solid'), opacity=1), row=9, col=1)
+        fig_2D.add_trace(go.Scatter(name='r_optim', y=df_optim['r'], line=dict(shape='linear', color=colorseq[8], dash='solid'), opacity=0.5), row=9, col=1)
         fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
     elif 'output-data-upload' in changed_id and not traj_data.empty:
         fig_3D = go.Figure()
