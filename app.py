@@ -83,7 +83,7 @@ app.layout = html.Div(children=[
 
 def parse_contents(contents, filename):
     global traj_data, traj_filepath
-    traj_filepath = "/home/fidel/repos/DeepAero/" + filename
+    traj_filepath = "/home/fidel/repos/deepaero/" + filename
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
