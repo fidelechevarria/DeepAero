@@ -20,13 +20,31 @@ class Optimizer():
         vismodel.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
                             aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
                             aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
+        roll = []
+        pitch = []
+        yaw = []
+        p = []
+        q = []
+        r = []
         posNorth = []
         posEast = []
         posDown = []
+        vx = []
+        vy = []
+        vz = []
         states = vismodel.getStates()
+        roll.append(states[3])
+        pitch.append(states[4])
+        yaw.append(states[5])
+        p.append(states[6])
+        q.append(states[7])
+        r.append(states[8])
         posNorth.append(states[0])
         posEast.append(states[1])
         posDown.append(-states[2])
+        vx.append(states[9])
+        vy.append(states[10])
+        vz.append(states[11])
         for idx in range(1200):
             traj = vismodel.getTrajectorySample(idx)
             da = traj[1]
@@ -35,10 +53,20 @@ class Optimizer():
             dt = traj[4]
             vismodel.propagate(da, de, dr, dt, period)
             states = vismodel.getStates()
+            roll.append(states[3])
+            pitch.append(states[4])
+            yaw.append(states[5])
+            p.append(states[6])
+            q.append(states[7])
+            r.append(states[8])
             posNorth.append(states[0])
             posEast.append(states[1])
             posDown.append(-states[2])
-        return pd.DataFrame({'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown})
+            vx.append(states[9])
+            vy.append(states[10])
+            vz.append(states[11])
+        return pd.DataFrame({'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown, 'roll': roll, 'pitch': pitch, 'yaw': yaw,
+                             'vx': vx, 'vy': vy, 'vz': vz, 'p': p, 'q': q, 'r': r})
 
     def optimize(self, trajFile):
         self.model.loadTrajectory(trajFile)
