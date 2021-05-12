@@ -75,8 +75,8 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     //Introduce turbulence
     if (_params.turbulenceIntensity != 0.0F)
     {
-        std::mt19937 _gen;
-        std::uniform_real_distribution<float> _dist(0, 1);
+        static std::mt19937 _gen;
+        static std::uniform_real_distribution<float> _dist(0, 1);
         float turb = _params.turbulenceIntensity * 10.0F;
         float turbulenceCoeff = 1.0F / std::max(std::min(-1.08F * _internals.TAS + 120.0F, 0.1F), 100.0F);
         _internals.windNorth += turbulenceCoeff * (_dist(_gen) * turb - turb / 2.0F);
