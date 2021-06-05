@@ -56,24 +56,29 @@ app.layout = html.Div(children=[
     html.Div(
         id='output-data-upload',
         style={
-            'width': '800px'
+            'width': '800px',
+            'margin': '10px'
         }
     ),
 
     html.Button(
         'Optimize',
         id='optimize-button',
-        n_clicks=0
+        n_clicks=0,
+        style={
+            'padding': '10',
+            'margin': '10px'
+        }
     ),
 
     dcc.Graph(
         id='3Dtraj',
         figure=go.Figure(),
         style={
-            'width': '600px'
+            'width': '600px',
         }
     ),
-
+    
     dcc.Graph(
         id='2Dtraj',
         figure=make_subplots(rows=9, cols=1),
@@ -82,49 +87,80 @@ app.layout = html.Div(children=[
             # 'height': '1200px',
         }
     ),
-])
 
-def parse_contents(contents, filename):
-    global traj_data, traj_filepath
-    traj_filepath = "/home/fidel/repos/deepaero/" + filename
-    content_type, content_string = contents.split(',')
-    decoded = base64.b64decode(content_string)
-    try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
-        traj_data = df # Store dataset in global variable traj_data
-    except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing this file.'
-        ])
+    # html.Div(
+    #     id='output-coeffs',
+    #     style={
+    #         'width': '100px',
+    #         'margin': '10px'
+    #     }
+    # ),
+], style={'columnCount': 2})
 
-    return html.Div([
-        html.H5(filename),
-
-        dash_table.DataTable(
-            data=df.head().round(decimals=2).to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df.columns],
-            style_as_list_view=True,
-            style_cell={'padding': '5px'},
-            style_header={
-                'backgroundColor': 'white',
-                'fontWeight': 'bold'
-            },
-        ),
-    ])
 
 @app.callback(
     dash.dependencies.Output('output-data-upload', 'children'),
+    # dash.dependencies.Output('output-coeffs', 'children'),],
     [dash.dependencies.Input('upload-data', 'contents')],
     [dash.dependencies.State('upload-data', 'filename')])
-def load_data(contents, name):
+def load_data(contents, filename):
     if contents is not None:
-        return parse_contents(contents, name)
+        global traj_data, traj_filepath
+        traj_filepath = "/home/fidel/repos/deepaero/" + filename
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+        try:
+            if 'csv' in filename:
+                # Assume that the user uploaded a CSV file
+                df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+            elif 'xls' in filename:
+                # Assume that the user uploaded an excel file
+                df = pd.read_excel(io.BytesIO(decoded))
+            traj_data = df # Store dataset in global variable traj_data
+        except Exception as e:
+            print(e)
+            return html.Div([
+                'There was an error processing this file.'
+            ])
+
+        df2 = pd.DataFrame({'p': [2, 3], 'q': [3, 4]})
+
+        table1 = html.Div([
+            html.H5(filename),
+            dash_table.DataTable(
+                data=df.head(3).round(decimals=2).to_dict('records'),
+                columns=[{'name': i, 'id': i} for i in df.columns],
+                style_as_list_view=True,
+                style_cell={'padding': '5px'},
+                style_header={
+                    'backgroundColor': 'white',
+                    'fontWeight': 'bold'
+                },
+            ),
+        ])
+
+        table2 = html.Div([
+            html.H5(filename),
+            dash_table.DataTable(
+                id='coeffs',
+                data=df2.head(3).round(decimals=2).to_dict('records'),
+                columns=[{'name': i, 'id': i} for i in df2.columns],
+                style_as_list_view=True,
+                style_cell={'padding': '5px'},
+                style_header={
+                    'backgroundColor': 'white',
+                    'fontWeight': 'bold'
+                },
+            ),
+        ])
+
+        us = 0
+        N = 100
+        for _ in range(N):
+            us += optimizer.getEvaluationTimeInMicroseconds()
+        print(f'Microseconds: {us/N}')
+
+        return table1#, table2
 
 @app.callback(
     [dash.dependencies.Output('3Dtraj', 'figure'),
@@ -168,6 +204,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
             paper_bgcolor="White",
+            title_text="3D trajectory",
         )
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 
@@ -209,6 +246,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
             paper_bgcolor="White",
+            title_text="3D trajectory",
         )
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 

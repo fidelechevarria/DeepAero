@@ -213,7 +213,7 @@ class Model
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filepath);
         void getTrajectorySample(float * buf, uint32_t idx);
-        float evaluate(AeroCoeffs_t aero);
+        float evaluate(AeroCoeffs_t aero, bool useLinearVelocities);
 
         inline void getStates(States_t * states)
         {

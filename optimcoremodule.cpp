@@ -75,13 +75,14 @@ static PyObject * PyModel_getTrajectorySample(PyModel* self, PyObject* args)
 static PyObject * PyModel_evaluate(PyModel* self, PyObject* args)
 {
     float coefs[26];
+    bool useLinVels;
 
-    if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffff",
+    if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffffp",
                           &coefs[0], &coefs[1], &coefs[2], &coefs[3], &coefs[4], &coefs[5],
                           &coefs[6], &coefs[7], &coefs[8], &coefs[9], &coefs[10], &coefs[11],
                           &coefs[12], &coefs[13], &coefs[14], &coefs[15], &coefs[16], &coefs[17],
                           &coefs[18], &coefs[19], &coefs[20], &coefs[21], &coefs[22], &coefs[23],
-                          &coefs[24], &coefs[25]))
+                          &coefs[24], &coefs[25], &useLinVels))
     {
         return NULL;
     }
@@ -91,7 +92,7 @@ static PyObject * PyModel_evaluate(PyModel* self, PyObject* args)
                          coefs[12], coefs[13], coefs[14], coefs[15], coefs[16], coefs[17],
                          coefs[18], coefs[19], coefs[20], coefs[21], coefs[22], coefs[23],
                          coefs[24], coefs[25]};
-    float retval = (self->ptrObj)->evaluate(aero);
+    float retval = (self->ptrObj)->evaluate(aero, useLinVels);
 
     return Py_BuildValue("f", retval);
 }
