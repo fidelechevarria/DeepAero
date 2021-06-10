@@ -24,6 +24,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 traj_data = pd.DataFrame()
 traj_filepath = ""
+n_samples = 0
 
 optimizer = Optimizer()
 
@@ -105,7 +106,7 @@ app.layout = html.Div(children=[
     [dash.dependencies.State('upload-data', 'filename')])
 def load_data(contents, filename):
     if contents is not None:
-        global traj_data, traj_filepath
+        global traj_data, traj_filepath, n_samples
         traj_filepath = "/home/fidel/repos/deepaero/" + filename
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
@@ -117,6 +118,8 @@ def load_data(contents, filename):
                 # Assume that the user uploaded an excel file
                 df = pd.read_excel(io.BytesIO(decoded))
             traj_data = df # Store dataset in global variable traj_data
+            n_samples = df.shape[0] # Store number of samples
+            optimizer.loadTrajectory(traj_filepath, n_samples)
         except Exception as e:
             print(e)
             return html.Div([
@@ -159,7 +162,8 @@ def load_data(contents, filename):
         for _ in range(N):
             us += optimizer.getEvaluationTimeInMicroseconds()
         print(f'Microseconds: {us/N}')
-
+        print(f'Number of samples: {n_samples}')
+        print(f'Number of states: {df.shape[1]}')
         return table1#, table2
 
 @app.callback(
@@ -170,10 +174,10 @@ def load_data(contents, filename):
     [dash.dependencies.State('3Dtraj', 'figure'),
     dash.dependencies.State('2Dtraj', 'figure')])
 def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
-    global traj_data, traj_filepath
+    global traj_data
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'optimize-button' in changed_id:
-        df_optim, df_real = optimizer.optimize(traj_filepath)
+        df_optim, df_real = optimizer.optimize()
         fig_3D = go.Figure()
         fig_3D.add_trace(
             go.Scatter3d(

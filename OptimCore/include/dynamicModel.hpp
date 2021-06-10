@@ -41,7 +41,7 @@
 #define M2FT 3.28084               /*!< Number of feet in a meter */
 #define RAD2DEG (180 / M_PI)       /*!< Number of degrees in a radian */
 #define DEG2RAD (M_PI / 180)       /*!< Number of radians in a degree */
-#define N_samples 1200             /*!< Number of samples for each trajectory state */
+#define N_samples_max 18000        /*!< Maximum number of samples for each trajectory state */
 #define N_states 17                /*!< Number of states in trajectory */
 
 #ifdef __cplusplus
@@ -211,7 +211,7 @@ class Model
         
         void init(void);
         uint16_t propagate(Controls_t controls, float dtime);
-        void loadTrajectory(std::string filepath);
+        void loadTrajectory(std::string filePath, uint32_t N_samples);
         void getTrajectorySample(float * buf, uint32_t idx);
         float evaluate(AeroCoeffs_t aero, bool useLinearVelocities);
 
@@ -261,7 +261,8 @@ class Model
         Controls_t _controls;
         Internals_t _internals;
         States_t _states;
-        float *_trajectory = new float[N_states * N_samples]();
+        uint32_t _N_samples;
+        float *_trajectory = new float[N_states * N_samples_max]();
 };
 
 #ifdef __cplusplus

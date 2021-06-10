@@ -1,7 +1,7 @@
 #include "dynamicModel.hpp"
 
 //Constructor
-Model::Model(void)
+Model::Model(void) : _N_samples(0)
 {
     this->init();
 }
@@ -194,8 +194,9 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     return 69;
 }
 
-void Model::loadTrajectory(std::string filePath)
+void Model::loadTrajectory(std::string filePath, uint32_t N_samples)
 {
+    _N_samples = N_samples;
     std::string lineString;
     std::ifstream readStream;
     readStream.open(filePath);
@@ -216,11 +217,11 @@ void Model::loadTrajectory(std::string filePath)
         while ((pos = lineString.find(delimiter)) != std::string::npos)
         {
             token = lineString.substr(0, pos); // Extract text from start until first delimiter is found
-            _trajectory[stateNumber * N_samples + lineNumber] = std::stof(token);
+            _trajectory[stateNumber * _N_samples + lineNumber] = std::stof(token);
             lineString.erase(0, pos + delimiter.length()); // Delete this section from the string since it has already been parsed
             stateNumber++;
         }
-        _trajectory[stateNumber * N_samples + lineNumber] = std::stof(lineString);
+        _trajectory[stateNumber * _N_samples + lineNumber] = std::stof(lineString);
         lineNumber++;
     }
 }
@@ -229,7 +230,7 @@ void Model::getTrajectorySample(float * buf, uint32_t idx)
 {
     for (uint16_t i = 0 ; i < N_states ; i++)
     {
-        buf[i] = _trajectory[i * N_samples + idx];
+        buf[i] = _trajectory[i * _N_samples + idx];
     }
 }
 
@@ -243,29 +244,29 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities)
     float diffVx, diffVy, diffVz = 0.0F;
     float diffp, diffq, diffr = 0.0F;
     float fitness = 0.0F;
-    for (uint32_t i = 0 ; i < N_samples ; i++)
+    for (uint32_t i = 0 ; i < _N_samples ; i++)
     {
-        Controls_t controls = {_trajectory[1 * N_samples + i],   //da
-                               _trajectory[2 * N_samples + i],   //de
-                               _trajectory[3 * N_samples + i],   //dr
-                               _trajectory[4 * N_samples + i]};  //dt
+        Controls_t controls = {_trajectory[1 * _N_samples + i],   //da
+                               _trajectory[2 * _N_samples + i],   //de
+                               _trajectory[3 * _N_samples + i],   //dr
+                               _trajectory[4 * _N_samples + i]};  //dt
         this->propagate(controls, dt);
-        // diffNorth = (_states.posNorth - _trajectory[8 * N_samples + i]);
-        // diffEast = (_states.posEast - _trajectory[9 * N_samples + i]);
-        // diffDown = (-_states.alt - _trajectory[10 * N_samples + i]);
+        // diffNorth = (_states.posNorth - _trajectory[8 * _N_samples + i]);
+        // diffEast = (_states.posEast - _trajectory[9 * _N_samples + i]);
+        // diffDown = (-_states.alt - _trajectory[10 * _N_samples + i]);
         // fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
         if (useLinearVelocities)
         {
-            diffVx = (_states.vx - _trajectory[11 * N_samples + i]);
-            diffVy = (_states.vy - _trajectory[12 * N_samples + i]);
-            diffVz = (_states.vz - _trajectory[13 * N_samples + i]);
+            diffVx = (_states.vx - _trajectory[11 * _N_samples + i]);
+            diffVy = (_states.vy - _trajectory[12 * _N_samples + i]);
+            diffVz = (_states.vz - _trajectory[13 * _N_samples + i]);
             fitness += sqrtf(diffVx * diffVx + diffVy * diffVy + diffVz * diffVz);
         }
-        diffp = (_states.p - _trajectory[14 * N_samples + i]);
-        diffq = (_states.q - _trajectory[15 * N_samples + i]);
-        diffr = (_states.r - _trajectory[16 * N_samples + i]);
+        diffp = (_states.p - _trajectory[14 * _N_samples + i]);
+        diffq = (_states.q - _trajectory[15 * _N_samples + i]);
+        diffr = (_states.r - _trajectory[16 * _N_samples + i]);
         fitness += sqrtf(diffp * diffp + diffq * diffq + diffr * diffr);
     }
     _aero = originalAero;
-    return fitness / N_samples;
+    return fitness / _N_samples;
 }

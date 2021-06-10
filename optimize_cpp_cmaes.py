@@ -9,16 +9,23 @@ class Optimizer():
     def __init__(self):
         self.model = optim.Model()
         self.useLinVels = False
+        self.trajFile = ''
+        self.nsamples = 0
 
     def fitness(self, aero):
         return self.model.evaluate(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8], aero[9],
                                    aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17], aero[18], aero[19],
                                    aero[20], aero[21], aero[22], aero[23], aero[24], aero[25], self.useLinVels)
+    
+    def loadTrajectory(self, trajFile, nsamples):
+        self.trajFile = trajFile
+        self.nsamples = nsamples
+        self.model.loadTrajectory(trajFile, nsamples)
 
-    def getTrajectory(self, aero, trajFile):
+    def getTrajectory(self, aero):
         period = 1.0 / 60.0
         vismodel = optim.Model()
-        vismodel.loadTrajectory(trajFile)
+        vismodel.loadTrajectory(self.trajFile, self.nsamples)
         vismodel.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
                             aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
                             aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
@@ -70,8 +77,7 @@ class Optimizer():
         return pd.DataFrame({'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown, 'roll': roll, 'pitch': pitch, 'yaw': yaw,
                              'vx': vx, 'vy': vy, 'vz': vz, 'p': p, 'q': q, 'r': r})
 
-    def optimize(self, trajFile):
-        self.model.loadTrajectory(trajFile)
+    def optimize(self):
         defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
         x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
         self.useLinVels = False
@@ -89,7 +95,7 @@ class Optimizer():
         x0 = [element for element in res[0]]
         pd.options.display.float_format = '{:,.5f}'.format
         print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
-        return self.getTrajectory(res[0], trajFile), self.getTrajectory(defaultAero, trajFile)
+        return self.getTrajectory(res[0]), self.getTrajectory(defaultAero)
 
     def getEvaluationTimeInMicroseconds(self):
         now = datetime.datetime.now()

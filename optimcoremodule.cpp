@@ -44,13 +44,14 @@ static PyObject * PyModel_propagate(PyModel* self, PyObject* args)
 static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
 {
     char * file;
+    uint32_t nsamples;
     
-    if (!PyArg_ParseTuple(args, "s", &file))
+    if (!PyArg_ParseTuple(args, "si", &file, &nsamples))
     {
         return NULL;
     }
 
-    (self->ptrObj)->loadTrajectory((std::string)file);
+    (self->ptrObj)->loadTrajectory((std::string)file, nsamples);
 
     return Py_BuildValue("i", 69);
 }
