@@ -54,7 +54,7 @@ class Optimizer():
         vx.append(states[9])
         vy.append(states[10])
         vz.append(states[11])
-        for idx in range(1200):
+        for idx in range(self.nsamples):
             traj = vismodel.getTrajectorySample(idx)
             da = traj[1]
             de = traj[2]
