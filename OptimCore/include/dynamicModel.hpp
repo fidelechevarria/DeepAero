@@ -209,7 +209,7 @@ class Model
         Model(void);
         ~Model();
         
-        void init(void);
+        void init(const bool useInitialTrajectoryStates);
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filePath, uint32_t N_samples);
         void getTrajectorySample(float * buf, uint32_t idx);

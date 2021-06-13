@@ -3,10 +3,10 @@
 //Constructor
 Model::Model(void) : _N_samples(0)
 {
-    this->init();
+    this->init(false);
 }
 
-void Model::init(void)
+void Model::init(const bool useInitialTrajectoryStates)
 {
     _internals = {0};
     _states = {0, 0, 0, 0, 0, 0, 0, 0, 900, 0, 0, 0};
@@ -37,6 +37,26 @@ void Model::init(void)
     _internals.windNorth = _params.windVelocity * cosf(_params.windElevation) * cosf(_params.windHeading);
     _internals.windEast = _params.windVelocity * cosf(_params.windElevation) * sinf(_params.windHeading);
     _internals.windUp = _params.windVelocity * sinf(_params.windElevation);
+
+    if (useInitialTrajectoryStates)
+    {
+        //Set initial states and internals with loaded trajectory as reference
+        _states.roll = _trajectory[5 * _N_samples];
+        _states.pitch = _trajectory[6 * _N_samples];
+        _states.yaw = _trajectory[7 * _N_samples];
+        _states.p = _trajectory[14 * _N_samples];
+        _states.q = _trajectory[15 * _N_samples];
+        _states.r = _trajectory[16 * _N_samples];
+        _states.posNorth = _trajectory[8 * _N_samples];
+        _states.posEast = _trajectory[9 * _N_samples];
+        _states.alt = - _trajectory[10 * _N_samples]; //Caution: negated value
+        _states.vx = _trajectory[11 * _N_samples];
+        _states.vy = _trajectory[12 * _N_samples];
+        _states.vz = _trajectory[13 * _N_samples];
+        _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
+        _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
+        _internals.beta = asinf(_states.vy / _internals.V);
+    }
 }
 
 Model::~Model()
@@ -237,7 +257,7 @@ void Model::getTrajectorySample(float * buf, uint32_t idx)
 float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities)
 {
     AeroCoeffs_t originalAero = _aero;
-    this->init();
+    this->init(true); // useInitialTrajectoryStates = true
     _aero = aero;
     float dt = 1.0F / 60.0F;
     // float diffNorth, diffEast, diffDown = 0.0F;
