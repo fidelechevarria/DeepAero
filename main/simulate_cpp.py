@@ -65,15 +65,7 @@ def step():
 	# Define global variables
 	global iteration
 
-	# Get joystick values
-	pygame.event.pump()
-	dac = -js.get_axis(ROLL_AXIS) * angular_range_ailerons
-	dec = -js.get_axis(PITCH_AXIS) * angular_range_elevator
-	drc = -js.get_axis(THROTTLE_AXIS) * angular_range_rudder
-	dtc = -js.get_axis(YAW_AXIS) / 2 + 0.5
-
-	# Propagate model and send to FlightGear
-	plane.propagate(dac, dec, drc, dtc, 1 / update_frequency)  # Propagate model
+	# Send to FlightGear
 	states = plane.getStates()
 	controls = plane.getControls()
 	internals = plane.getInternals()
@@ -128,6 +120,16 @@ def step():
 	q_buf.append(q)
 	r_buf.append(r)
 
+	# Get joystick values
+	pygame.event.pump()
+	dac = -js.get_axis(ROLL_AXIS) * angular_range_ailerons
+	dec = -js.get_axis(PITCH_AXIS) * angular_range_elevator
+	drc = -js.get_axis(THROTTLE_AXIS) * angular_range_rudder
+	dtc = -js.get_axis(YAW_AXIS) / 2 + 0.5
+
+	# Propagate model
+	plane.propagate(dac, dec, drc, dtc, 1 / update_frequency)
+	
 	# Update counter
 	iteration += 1
 
