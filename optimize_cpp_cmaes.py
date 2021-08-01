@@ -11,11 +11,13 @@ class Optimizer():
         self.useLinVels = False
         self.trajFile = ''
         self.nsamples = 0
+        self.numberOfSamplesToUse = -1
 
     def fitness(self, aero):
         return self.model.evaluate(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8], aero[9],
                                    aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17], aero[18], aero[19],
-                                   aero[20], aero[21], aero[22], aero[23], aero[24], aero[25], self.useLinVels)
+                                   aero[20], aero[21], aero[22], aero[23], aero[24], aero[25],
+                                   self.useLinVels, self.numberOfSamplesToUse)
     
     def loadTrajectory(self, trajFile, nsamples):
         self.trajFile = trajFile
@@ -81,6 +83,7 @@ class Optimizer():
         defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
         x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
         self.useLinVels = False
+        self.numberOfSamplesToUse = -1
         es = cma.CMAEvolutionStrategy(x0, 0.2)
         es.optimize(self.fitness)
         res = es.result
@@ -89,6 +92,8 @@ class Optimizer():
         print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
         self.useLinVels = True
         es._set_x0(x0)
+        # sigma0 = 0.01
+        # es.__init__(x0, sigma0)
         es.optimize(self.fitness)
         # while not es.stop():
         #     solutions = es.ask()
@@ -104,7 +109,7 @@ class Optimizer():
     def getEvaluationTimeInMicroseconds(self):
         now = datetime.datetime.now()
         self.model.evaluate(0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021,
-                           -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265, True)
+                           -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265, True, self.nsamples)
         ellapsed = datetime.datetime.now() - now
         return int(ellapsed.total_seconds() * 1e6) # microseconds
 

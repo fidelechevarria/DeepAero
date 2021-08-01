@@ -38,7 +38,7 @@ static PyObject * PyModel_propagate(PyModel* self, PyObject* args)
     Controls_t controls = {da, de, dr, dt};
     retval = (self->ptrObj)->propagate(controls, dtime);
 
-    return Py_BuildValue("i", retval);
+    return Py_BuildValue("I", retval);
 }
 
 static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
@@ -46,7 +46,7 @@ static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
     char * file;
     uint32_t nsamples;
     
-    if (!PyArg_ParseTuple(args, "si", &file, &nsamples))
+    if (!PyArg_ParseTuple(args, "sI", &file, &nsamples))
     {
         return NULL;
     }
@@ -60,7 +60,7 @@ static PyObject * PyModel_getTrajectorySample(PyModel* self, PyObject* args)
 {
     uint32_t idx;
 
-    if (!PyArg_ParseTuple(args, "i", &idx))
+    if (!PyArg_ParseTuple(args, "I", &idx))
     {
         return NULL;
     }
@@ -77,13 +77,14 @@ static PyObject * PyModel_evaluate(PyModel* self, PyObject* args)
 {
     float coefs[26];
     bool useLinVels;
+    int32_t numberOfSamplesToUse;
 
-    if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffffp",
+    if (!PyArg_ParseTuple(args, "ffffffffffffffffffffffffffpi",
                           &coefs[0], &coefs[1], &coefs[2], &coefs[3], &coefs[4], &coefs[5],
                           &coefs[6], &coefs[7], &coefs[8], &coefs[9], &coefs[10], &coefs[11],
                           &coefs[12], &coefs[13], &coefs[14], &coefs[15], &coefs[16], &coefs[17],
                           &coefs[18], &coefs[19], &coefs[20], &coefs[21], &coefs[22], &coefs[23],
-                          &coefs[24], &coefs[25], &useLinVels))
+                          &coefs[24], &coefs[25], &useLinVels, &numberOfSamplesToUse))
     {
         return NULL;
     }
@@ -93,7 +94,7 @@ static PyObject * PyModel_evaluate(PyModel* self, PyObject* args)
                          coefs[12], coefs[13], coefs[14], coefs[15], coefs[16], coefs[17],
                          coefs[18], coefs[19], coefs[20], coefs[21], coefs[22], coefs[23],
                          coefs[24], coefs[25]};
-    float retval = (self->ptrObj)->evaluate(aero, useLinVels);
+    float retval = (self->ptrObj)->evaluate(aero, useLinVels, numberOfSamplesToUse);
 
     return Py_BuildValue("f", retval);
 }

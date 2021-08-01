@@ -14,6 +14,8 @@ void Model::init(const bool useInitialTrajectoryStates)
     _aero = {0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265};
     _controls = {0, 0, 0, 0};
 
+    _firstPropagationCompleted = false;
+
     //For estimation of AoA, pitch and body velocities for level flight
     float dynamicPressure = 0.5 * _params.rho * _params.initVelocity * _params.initVelocity;
     float term1 = tanf((((_params.m * _params.g) / (dynamicPressure * _params.S)) - _aero.Cl0) / _aero.Cla + _params.incidence);
@@ -171,18 +173,51 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     _internals.alt_dot = _states.vx * sp - _states.vy * sr * cp - _states.vz * cr * cp;
 
     //Propagate states
-    _states.vx += _internals.vx_dot * dtime;
-    _states.vy += _internals.vy_dot * dtime;
-    _states.vz += _internals.vz_dot * dtime;
-    _states.roll += _internals.roll_dot * dtime;
-    _states.pitch += _internals.pitch_dot * dtime;
-    _states.yaw += _internals.yaw_dot * dtime;
-    _states.p += _internals.p_dot * dtime;
-    _states.q += _internals.q_dot * dtime;
-    _states.r += _internals.r_dot * dtime;
-    _states.posNorth += _internals.posNorth_dot * dtime;
-    _states.posEast += _internals.posEast_dot * dtime;
-    _states.alt += _internals.alt_dot * dtime;
+    if (_firstPropagationCompleted)
+    {
+        _states.vx += (_internals.vx_dot + _internals.vx_dot_old) * 0.5F * dtime;
+        _states.vy += (_internals.vy_dot + _internals.vy_dot_old) * 0.5F * dtime;
+        _states.vz += (_internals.vz_dot + _internals.vz_dot_old) * 0.5F * dtime;
+        _states.roll += (_internals.roll_dot + _internals.roll_dot_old) * 0.5F * dtime;
+        _states.pitch += (_internals.pitch_dot + _internals.pitch_dot_old) * 0.5F * dtime;
+        _states.yaw += (_internals.yaw_dot + _internals.yaw_dot_old) * 0.5F * dtime;
+        _states.p += (_internals.p_dot + _internals.p_dot_old) * 0.5F * dtime;
+        _states.q += (_internals.q_dot + _internals.q_dot_old) * 0.5F * dtime;
+        _states.r += (_internals.r_dot + _internals.r_dot_old) * 0.5F * dtime;
+        _states.posNorth += (_internals.posNorth_dot + _internals.posNorth_dot_old) * 0.5F * dtime;
+        _states.posEast += (_internals.posEast_dot + _internals.posEast_dot_old) * 0.5F * dtime;
+        _states.alt += (_internals.alt_dot + _internals.alt_dot_old) * 0.5F * dtime;
+    }
+    else
+    {
+        _states.vx += _internals.vx_dot * dtime;
+        _states.vy += _internals.vy_dot * dtime;
+        _states.vz += _internals.vz_dot * dtime;
+        _states.roll += _internals.roll_dot * dtime;
+        _states.pitch += _internals.pitch_dot * dtime;
+        _states.yaw += _internals.yaw_dot * dtime;
+        _states.p += _internals.p_dot * dtime;
+        _states.q += _internals.q_dot * dtime;
+        _states.r += _internals.r_dot * dtime;
+        _states.posNorth += _internals.posNorth_dot * dtime;
+        _states.posEast += _internals.posEast_dot * dtime;
+        _states.alt += _internals.alt_dot * dtime;
+    }
+
+    //Store old rates
+    _firstPropagationCompleted = true;
+    _internals.vx_dot_old = _internals.vx_dot;
+    _internals.vy_dot_old = _internals.vy_dot;
+    _internals.vz_dot_old = _internals.vz_dot;
+    _internals.roll_dot_old = _internals.roll_dot;
+    _internals.pitch_dot_old = _internals.pitch_dot;
+    _internals.yaw_dot_old = _internals.yaw_dot;
+    _internals.p_dot_old = _internals.p_dot;
+    _internals.q_dot_old = _internals.q_dot;
+    _internals.r_dot_old = _internals.r_dot;
+    _internals.posNorth_dot_old = _internals.posNorth_dot;
+    _internals.posEast_dot_old = _internals.posEast_dot;
+    _internals.alt_dot_old = _internals.alt_dot;
 
     //Transform flat earth position to LLA
     float sinLat = sinf(_internals.lat);
@@ -254,8 +289,16 @@ void Model::getTrajectorySample(float * buf, uint32_t idx)
     }
 }
 
-float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities)
+float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numberOfSamplesToUse)
 {
+    if (numberOfSamplesToUse < 0)
+    {
+        numberOfSamplesToUse = _N_samples;
+    }
+    else if ((uint32_t)numberOfSamplesToUse > _N_samples)
+    {
+        numberOfSamplesToUse = _N_samples;
+    }
     AeroCoeffs_t originalAero = _aero;
     this->init(true); // useInitialTrajectoryStates = true
     _aero = aero;
@@ -264,7 +307,7 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities)
     float diffVx, diffVy, diffVz = 0.0F;
     float diffp, diffq, diffr = 0.0F;
     float fitness = 0.0F;
-    for (uint32_t i = 0 ; i < _N_samples ; i++)
+    for (int32_t i = 0 ; i < numberOfSamplesToUse ; i++)
     {
         Controls_t controls = {_trajectory[1 * _N_samples + i],   //da
                                _trajectory[2 * _N_samples + i],   //de
@@ -288,5 +331,5 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities)
         fitness += sqrtf(diffp * diffp + diffq * diffq + diffr * diffr);
     }
     _aero = originalAero;
-    return fitness / _N_samples;
+    return fitness / numberOfSamplesToUse;
 }

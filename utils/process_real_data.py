@@ -28,7 +28,7 @@ def TrimPacket(packet, timeStart, timeEnd, timeReference='totalTime'):
     return packet[(packet[timeReference] >= timeStart) & (packet[timeReference] <= timeEnd)].reset_index()
 
 data = pd.read_csv('real_data.csv') # Read real data from file
-data = TrimPacket(data, 1400, 1450, timeReference='time') # Trim packet to desired time range
+data = TrimPacket(data, 1400, 1420, timeReference='time') # Trim packet to desired time range
 data = ResamplePacket(data, frequency=60, timeReference='time') # Resample packet to 60 Hz frequency
 
 # Transform LLA to NED coordinates

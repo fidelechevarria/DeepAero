@@ -178,6 +178,18 @@ typedef struct
     float TAS_x;              /*!<  */
     float TAS_y;              /*!<  */
     float TAS_z;              /*!<  */
+    float vx_dot_old;         /*!<  */
+    float vy_dot_old;         /*!<  */
+    float vz_dot_old;         /*!<  */
+    float roll_dot_old;       /*!<  */
+    float pitch_dot_old;      /*!<  */
+    float yaw_dot_old;        /*!<  */
+    float p_dot_old;          /*!<  */
+    float q_dot_old;          /*!<  */
+    float r_dot_old;          /*!<  */
+    float posNorth_dot_old;   /*!<  */
+    float posEast_dot_old;    /*!<  */
+    float alt_dot_old;        /*!<  */
 } Internals_t;
 
 /**
@@ -213,7 +225,7 @@ class Model
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filePath, uint32_t N_samples);
         void getTrajectorySample(float * buf, uint32_t idx);
-        float evaluate(AeroCoeffs_t aero, bool useLinearVelocities);
+        float evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numberOfSamplesToUse);
 
         inline void getStates(States_t * states)
         {
@@ -262,6 +274,7 @@ class Model
         Internals_t _internals;
         States_t _states;
         uint32_t _N_samples;
+        bool _firstPropagationCompleted;
         float *_trajectory = new float[N_states * N_samples_max]();
 };
 
