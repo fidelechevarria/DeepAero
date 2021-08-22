@@ -94,12 +94,12 @@ class Optimizer():
         es._set_x0(x0)
         # sigma0 = 0.01
         # es.__init__(x0, sigma0)
-        es.optimize(self.fitness)
-        # while not es.stop():
-        #     solutions = es.ask()
-        #     es.tell(solutions, [self.fitness(s) for s in solutions])
-        #     es.disp()
-        # es.result_pretty()
+        # es.optimize(self.fitness)
+        while not es.stop():
+            solutions = es.ask()
+            es.tell(solutions, [self.fitness(s) for s in solutions])
+            es.disp()
+        es.result_pretty()
         res = es.result
         x0 = [element for element in res[0]]
         pd.options.display.float_format = '{:,.5f}'.format
