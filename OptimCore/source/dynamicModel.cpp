@@ -279,6 +279,7 @@ void Model::loadTrajectory(std::string filePath, uint32_t N_samples)
         _trajectory[stateNumber * _N_samples + lineNumber] = std::stof(lineString);
         lineNumber++;
     }
+    this->init(true); // useInitialTrajectoryStates = true
 }
 
 void Model::getTrajectorySample(float * buf, uint32_t idx)
