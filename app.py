@@ -177,7 +177,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
     global traj_data
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'optimize-button' in changed_id:
-        df_optim, df_real = optimizer.optimize()
+        df_optim, df_real = optimizer.optimize(mode='eval')
         fig_3D = go.Figure()
         fig_3D.add_trace(
             go.Scatter3d(

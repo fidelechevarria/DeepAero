@@ -80,51 +80,79 @@ class Optimizer():
         return pd.DataFrame({'posNorth': posNorth, 'posEast': posEast, 'posDown': posDown, 'roll': roll, 'pitch': pitch, 'yaw': yaw,
                              'vx': vx, 'vy': vy, 'vz': vz, 'p': p, 'q': q, 'r': r})
 
-    def optimize(self):
-        defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
-        x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
-        self.useLinVels = False
-        self.numberOfSamplesToUse = -1
-        es = cma.CMAEvolutionStrategy(x0, 0.2)
-        # es.optimize(self.fitness)
-        while not es.stop():
-        # for _ in range(100):
-            solutions = es.ask()
-            es.tell(solutions, [self.fitness(s) for s in solutions])
-            es.disp()
-        es.result_pretty()
-        res = es.result
-        x0 = [element for element in res[0]]
-        # pd.options.display.float_format = '{:,.5f}'.format
-        # print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
-        self.useLinVels = True
-        es._set_x0(x0)
-        # sigma0 = 0.01
-        # es.__init__(x0, sigma0)
-        # es.optimize(self.fitness)
-        while not es.stop():
-        # for _ in range(100):
-            solutions = es.ask()
-            es.tell(solutions, [self.fitness(s) for s in solutions])
-            es.disp()
-        es.result_pretty()
-        res = es.result
-        x0 = [element for element in res[0]]
-        pd.options.display.float_format = '{:,.5f}'.format
-        print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
-        ref_array = np.expand_dims(np.array(defaultAero), axis=1).T
-        sol_array = np.expand_dims(np.array(x0), axis=1).T
-        best_sol = res[0]
-        SD = cdist(ref_array, sol_array, metric='cityblock')[0][0] # Calculate Manhattan distance
-        BF = res[1]
-        ES = res[2]
-        FS = int(BF < 1e-2)
-        DS = int(SD < 5)
-        print('Manhattan distance: ' + str(SD))
-        print('Best fitness: ' + str(BF))
-        print('Number of evaluations: ' + str(ES))
-        print('Fitness success: ' + str(FS))
-        print('Distance success: ' + str(DS))
+    def optimize(self, mode='single'):
+        MBF = 0
+        MSD = 0
+        FSR = 0
+        DSR = 0
+        AES = 0
+        if mode == 'single':
+            N_runs = 1
+        elif mode == 'eval':
+            N_runs = 10
+        for run in range(N_runs):
+            defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
+            x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
+            self.useLinVels = False
+            self.numberOfSamplesToUse = -1
+            es = cma.CMAEvolutionStrategy(x0, 0.2)
+            # es.optimize(self.fitness)
+            while not es.stop():
+            # for _ in range(5):
+                solutions = es.ask()
+                es.tell(solutions, [self.fitness(s) for s in solutions])
+                es.disp()
+            es.result_pretty()
+            res = es.result
+            x0 = [element for element in res[0]]
+            # pd.options.display.float_format = '{:,.5f}'.format
+            # print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
+            self.useLinVels = True
+            es._set_x0(x0)
+            # sigma0 = 0.01
+            # es.__init__(x0, sigma0)
+            # es.optimize(self.fitness)
+            while not es.stop():
+            # for _ in range(5):
+                solutions = es.ask()
+                es.tell(solutions, [self.fitness(s) for s in solutions])
+                es.disp()
+            es.result_pretty()
+            res = es.result
+            x0 = [element for element in res[0]]
+            pd.options.display.float_format = '{:,.5f}'.format
+            print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
+            ref_array = np.expand_dims(np.array(defaultAero), axis=1).T
+            sol_array = np.expand_dims(np.array(x0), axis=1).T
+            best_sol = res[0]
+            BF = res[1]
+            SD = cdist(ref_array, sol_array, metric='cityblock')[0][0] # Calculate Manhattan distance
+            FS = int(BF < 1e-2)
+            DS = int(SD < 5)
+            ES = res[2]
+            MBF += BF
+            MSD += SD
+            FSR += FS
+            DSR += DS
+            AES += ES
+            print('Metrics of run number ' + str(run))
+            print('Best fitness: ' + str(BF))
+            print('Manhattan distance: ' + str(SD))
+            print('Fitness success: ' + str(FS))
+            print('Distance success: ' + str(DS))
+            print('Number of evaluations: ' + str(ES))
+        if mode == 'eval':
+            MBF /= N_runs
+            MSD /= N_runs
+            FSR /= N_runs
+            DSR /= N_runs
+            AES /= N_runs
+            print('Metrics after ' + str(N_runs) + ' runs')
+            print('Mean best fitness: ' + str(MBF))
+            print('Mean manhattan distance: ' + str(MSD))
+            print('Fitness success rate: ' + str(FSR))
+            print('Distance success rate: ' + str(DSR))
+            print('Average number of evaluations: ' + str(AES))
         return self.getTrajectory(best_sol), self.getTrajectory(defaultAero)
 
     def getEvaluationTimeInMicroseconds(self):
