@@ -123,7 +123,8 @@ static PyObject * PyModel_getInternals(PyModel* self, PyObject* args)
     Internals_t internals;
     (self->ptrObj)->getInternals(&internals);
 
-    return Py_BuildValue("ffffff", internals.lat, internals.lon, internals.rotor_rpm);
+    return Py_BuildValue("ffffff", internals.lat, internals.lon, internals.rotor_rpm,
+                                   internals.V, internals.alpha, internals.beta);
 }
 
 static PyObject * PyModel_getAeroCoeffs(PyModel* self, PyObject* args)
