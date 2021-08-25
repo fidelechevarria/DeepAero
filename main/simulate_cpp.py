@@ -39,8 +39,10 @@ angular_range_ailerons = 0.25
 angular_range_elevator = 0.25
 angular_range_rudder = 0.25
 
-# Set update frequency (Hz)
-update_frequency = 60
+# Set recording parameters
+update_frequency = 60 # Update frequency (Hz)
+setup_time = 5 # Initial setup time (s)
+recording_time = 20 # Duration of recording process (s)
 
 # Initialize variables for data recording
 da_buf = []
@@ -103,22 +105,23 @@ def step():
 	sock.sendto(buffer, (UDP_IP, UDP_PORT))  # Send array to FG
 
 	# Fill in data structure
-	da_buf.append(da)
-	de_buf.append(de)
-	dr_buf.append(dr)
-	dt_buf.append(dt)
-	roll_buf.append(roll)
-	pitch_buf.append(pitch)
-	yaw_buf.append(yaw)
-	posNorth_buf.append(posNorth)
-	posEast_buf.append(posEast)
-	posDown_buf.append(-alt)
-	vx_buf.append(vx)
-	vy_buf.append(vy)
-	vz_buf.append(vz)
-	p_buf.append(p)
-	q_buf.append(q)
-	r_buf.append(r)
+	if iteration >= update_frequency * setup_time:
+		da_buf.append(da)
+		de_buf.append(de)
+		dr_buf.append(dr)
+		dt_buf.append(dt)
+		roll_buf.append(roll)
+		pitch_buf.append(pitch)
+		yaw_buf.append(yaw)
+		posNorth_buf.append(posNorth)
+		posEast_buf.append(posEast)
+		posDown_buf.append(-alt)
+		vx_buf.append(vx)
+		vy_buf.append(vy)
+		vz_buf.append(vz)
+		p_buf.append(p)
+		q_buf.append(q)
+		r_buf.append(r)
 
 	# Get joystick values
 	pygame.event.pump()
@@ -134,7 +137,7 @@ def step():
 	iteration += 1
 
 	# Save data
-	if iteration == update_frequency * 20:
+	if iteration == update_frequency * (recording_time + setup_time):
 		df = pd.DataFrame({'da': da_buf,
 		                   'de': de_buf,
 						   'dr': dr_buf,
