@@ -16,33 +16,13 @@ void Model::init(const bool useInitialTrajectoryStates)
 
     _firstPropagationCompleted = false;
 
-    //For estimation of AoA, pitch and body velocities for level flight
-    float dynamicPressure = 0.5 * _params.rho * _params.initVelocity * _params.initVelocity;
-    float term1 = tanf((((_params.m * _params.g) / (dynamicPressure * _params.S)) - _aero.Cl0) / _aero.Cla + _params.incidence);
-
-    //Set initial velocities
-    _states.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
-    _states.vz = _states.vx * term1;
-
-    //Set internal variables
-    _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
-    _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
-    _internals.beta = asinf(_states.vy / _internals.V);
-    _internals.lon = -3.574605617 * DEG2RAD;  //Madrid Barajas Airport (LEMD)
-    _internals.lat = 40.49187427 * DEG2RAD;
-    _internals.Xt = _params.Tmax * _controls.dt;
-
-    //Set initial states
-    _states.pitch = _internals.alpha + _params.incidence;  //Same as np.arctan2(_states.vz, _states.vx)
-
-    //Set wind
-    _internals.windNorth = _params.windVelocity * cosf(_params.windElevation) * cosf(_params.windHeading);
-    _internals.windEast = _params.windVelocity * cosf(_params.windElevation) * sinf(_params.windHeading);
-    _internals.windUp = _params.windVelocity * sinf(_params.windElevation);
-
     if (useInitialTrajectoryStates)
     {
-        //Set initial states and internals with loaded trajectory as reference
+        //Set initial variables with loaded trajectory as reference
+        _controls.da = _trajectory[1 * _N_samples];
+        _controls.de = _trajectory[2 * _N_samples];
+        _controls.dr = _trajectory[3 * _N_samples];
+        _controls.dt = _trajectory[4 * _N_samples];
         _states.roll = _trajectory[5 * _N_samples];
         _states.pitch = _trajectory[6 * _N_samples];
         _states.yaw = _trajectory[7 * _N_samples];
@@ -58,7 +38,37 @@ void Model::init(const bool useInitialTrajectoryStates)
         _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
         _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
         _internals.beta = asinf(_states.vy / _internals.V);
+        _params.initVelocity = _internals.V;
     }
+
+    //For estimation of AoA, pitch and body velocities for level flight
+    float dynamicPressure = 0.5 * _params.rho * _params.initVelocity * _params.initVelocity;
+    float term1 = tanf((((_params.m * _params.g) / (dynamicPressure * _params.S)) - _aero.Cl0) / _aero.Cla + _params.incidence);
+
+    if (!useInitialTrajectoryStates)
+    {
+        //Set initial velocities
+        _states.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
+        _states.vz = _states.vx * term1;
+
+        //Set internal variables
+        _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
+        _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
+        _internals.beta = asinf(_states.vy / _internals.V);
+    
+        //Set initial states
+        _states.pitch = _internals.alpha + _params.incidence;  //Same as np.arctan2(_states.vz, _states.vx)
+    }
+    
+    //Set internal variables
+    _internals.lon = -3.574605617 * DEG2RAD;  //Madrid Barajas Airport (LEMD)
+    _internals.lat = 40.49187427 * DEG2RAD;
+    _internals.Xt = _params.Tmax * _controls.dt;
+
+    //Set wind
+    _internals.windNorth = _params.windVelocity * cosf(_params.windElevation) * cosf(_params.windHeading);
+    _internals.windEast = _params.windVelocity * cosf(_params.windElevation) * sinf(_params.windHeading);
+    _internals.windUp = _params.windVelocity * sinf(_params.windElevation);
 }
 
 Model::~Model()
