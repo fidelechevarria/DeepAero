@@ -5,10 +5,12 @@ import pandas as pd
 import datetime
 import cma
 
+frequency = 400.0
+
 class Optimizer():
 
     def __init__(self):
-        self.model = optim.Model()
+        self.model = optim.Model(frequency)
         self.useLinVels = False
         self.trajFile = ''
         self.nsamples = 0
@@ -26,7 +28,7 @@ class Optimizer():
         self.model.loadTrajectory(trajFile, nsamples)
 
     def getTrajectory(self, aero):
-        period = 1.0 / 60.0
+        period = 1.0 / frequency
         vismodel = optim.Model()
         vismodel.loadTrajectory(self.trajFile, self.nsamples)
         vismodel.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],

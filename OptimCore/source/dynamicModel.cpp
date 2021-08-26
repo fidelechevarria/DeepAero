@@ -1,9 +1,10 @@
 #include "dynamicModel.hpp"
 
 //Constructor
-Model::Model(void) : _N_samples(0)
+Model::Model(float freq) : _N_samples(0)
 {
     this->init(false);
+    _frequency = freq;
 }
 
 void Model::init(const bool useInitialTrajectoryStates)
@@ -85,10 +86,10 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     }
     else
     {
-        _controls.da += (1.0F / (60.0F * _params.servosResponseTime)) * (controls.da - _controls.da);
-        _controls.de += (1.0F / (60.0F * _params.servosResponseTime)) * (controls.de - _controls.de);
-        _controls.dr += (1.0F / (60.0F * _params.servosResponseTime)) * (controls.dr - _controls.dr);
-        _controls.dt += (1.0F / (60.0F * _params.servosResponseTime)) * (controls.dt - _controls.dt);
+        _controls.da += (1.0F / (_frequency * _params.servosResponseTime)) * (controls.da - _controls.da);
+        _controls.de += (1.0F / (_frequency * _params.servosResponseTime)) * (controls.de - _controls.de);
+        _controls.dr += (1.0F / (_frequency * _params.servosResponseTime)) * (controls.dr - _controls.dr);
+        _controls.dt += (1.0F / (_frequency * _params.servosResponseTime)) * (controls.dt - _controls.dt);
     }
 
     //Euler trigonometry variables
@@ -157,7 +158,7 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     }
     else
     {
-        _internals.Xt += (1 / (60 * _params.engineResponseTime)) * (_params.Tmax * _controls.dt - _internals.Xt);
+        _internals.Xt += (1.0F / (_frequency * _params.engineResponseTime)) * (_params.Tmax * _controls.dt - _internals.Xt);
     }
     _internals.rotor_rpm = _internals.Xt * 400 / _params.Tmax;
 
@@ -313,7 +314,7 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
     AeroCoeffs_t originalAero = _aero;
     this->init(true); // useInitialTrajectoryStates = true
     _aero = aero;
-    float dt = 1.0F / 60.0F;
+    float dt = 1.0F / _frequency;
     // float diffNorth, diffEast, diffDown = 0.0F;
     float diffVx, diffVy, diffVz = 0.0F;
     float diffp, diffq, diffr = 0.0F;

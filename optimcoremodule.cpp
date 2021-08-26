@@ -13,7 +13,14 @@ typedef struct
 static int PyModel_init(PyModel *self, PyObject *args, PyObject *kwds)
 // initialize PyModel Object
 {
-    self->ptrObj = new Model();
+    float freq;
+
+    if (!PyArg_ParseTuple(args, "f", &freq))
+    {
+        return -1;
+    }
+
+    self->ptrObj = new Model(freq);
 
     return 0;
 }

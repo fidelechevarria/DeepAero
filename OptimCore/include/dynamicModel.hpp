@@ -218,7 +218,7 @@ typedef struct
 class Model
 {
     public:
-        Model(void);
+        Model(float freq);
         ~Model();
         
         void init(const bool useInitialTrajectoryStates);
@@ -275,6 +275,7 @@ class Model
         States_t _states;
         uint32_t _N_samples;
         bool _firstPropagationCompleted;
+        float _frequency;
         float *_trajectory = new float[N_states * N_samples_max]();
 };
 
