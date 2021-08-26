@@ -95,7 +95,7 @@ class Optimizer():
             x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
             self.useLinVels = False
             self.numberOfSamplesToUse = -1
-            es = cma.CMAEvolutionStrategy(x0, 0.2)
+            es = cma.CMAEvolutionStrategy(x0, 0.2, {'popsize': 13})
             # es.optimize(self.fitness)
             while not es.stop():
             # for _ in range(5):
@@ -125,6 +125,8 @@ class Optimizer():
             ref_array = np.expand_dims(np.array(defaultAero), axis=1).T
             sol_array = np.expand_dims(np.array(x0), axis=1).T
             best_sol = res[0]
+            # self.useLinVels = True # Fitness for metric has to always be in (v+w) mode
+            # BF = self.fitness(best_sol) # Also available in res[1] if fitness was (v+w) in last execution
             BF = res[1]
             SD = cdist(ref_array, sol_array, metric='cityblock')[0][0] # Calculate Manhattan distance
             FS = int(BF < 1e-2)
