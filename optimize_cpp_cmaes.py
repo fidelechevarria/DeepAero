@@ -5,7 +5,7 @@ import pandas as pd
 import datetime
 import cma
 
-frequency = 400.0
+frequency = 60.0
 
 class Optimizer():
 
@@ -92,38 +92,40 @@ class Optimizer():
             N_runs = 1
         elif mode == 'eval':
             N_runs = 10
-        for run in range(N_runs):
             defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
             x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
-            self.useLinVels = False
-            self.numberOfSamplesToUse = -1
-            es = cma.CMAEvolutionStrategy(x0, 0.2, {'popsize': 13})
-            # es.optimize(self.fitness)
-            while not es.stop():
-            # for _ in range(5):
-                solutions = es.ask()
-                es.tell(solutions, [self.fitness(s) for s in solutions])
-                es.disp()
-            es.result_pretty()
-            res = es.result
-            x0 = [element for element in res[0]]
-            # pd.options.display.float_format = '{:,.5f}'.format
-            # print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
-            self.useLinVels = True
-            es._set_x0(x0)
-            # sigma0 = 0.01
-            # es.__init__(x0, sigma0)
-            # es.optimize(self.fitness)
-            while not es.stop():
-            # for _ in range(5):
-                solutions = es.ask()
-                es.tell(solutions, [self.fitness(s) for s in solutions])
-                es.disp()
-            es.result_pretty()
-            res = es.result
-            x0 = [element for element in res[0]]
-            pd.options.display.float_format = '{:,.5f}'.format
-            print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
+        for run in range(N_runs):
+            for pop_size in (13, 25, 50):
+                self.useLinVels = False
+                self.numberOfSamplesToUse = -1
+                es = cma.CMAEvolutionStrategy(x0, 0.2, {'popsize': pop_size})
+                print('POPSIZE = ' + str(pop_size))
+                # es.optimize(self.fitness)
+                while not es.stop():
+                # for _ in range(5):
+                    solutions = es.ask()
+                    es.tell(solutions, [self.fitness(s) for s in solutions])
+                    es.disp()
+                es.result_pretty()
+                res = es.result
+                x0 = [element for element in res[0]]
+                # pd.options.display.float_format = '{:,.5f}'.format
+                # print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
+                self.useLinVels = True
+                es._set_x0(x0)
+                # sigma0 = 0.01
+                # es.__init__(x0, sigma0)
+                # es.optimize(self.fitness)
+                while not es.stop():
+                # for _ in range(5):
+                    solutions = es.ask()
+                    es.tell(solutions, [self.fitness(s) for s in solutions])
+                    es.disp()
+                es.result_pretty()
+                res = es.result
+                x0 = [element for element in res[0]]
+                pd.options.display.float_format = '{:,.5f}'.format
+                print(pd.DataFrame({'real': defaultAero, 'optim': x0}))
             ref_array = np.expand_dims(np.array(defaultAero), axis=1).T
             sol_array = np.expand_dims(np.array(x0), axis=1).T
             best_sol = res[0]
