@@ -13,8 +13,13 @@ UDP_IP = "127.0.0.1"
 UDP_PORT = 5502
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # AF_INET: Internet  SOCK_DGRAM: UDP
 
+# Set recording parameters
+update_frequency = 60 # Update frequency (Hz)
+setup_time = 5 # Initial setup time (s)
+recording_time = 20 # Duration of recording process (s)
+
 # Create plane object
-plane = optim.Model()
+plane = optim.Model(update_frequency)
 
 # Auxiliary variables
 m2ft = 3.28084
@@ -38,11 +43,6 @@ js.init()
 angular_range_ailerons = 0.25
 angular_range_elevator = 0.25
 angular_range_rudder = 0.25
-
-# Set recording parameters
-update_frequency = 60 # Update frequency (Hz)
-setup_time = 5 # Initial setup time (s)
-recording_time = 20 # Duration of recording process (s)
 
 # Initialize variables for data recording
 da_buf = []
