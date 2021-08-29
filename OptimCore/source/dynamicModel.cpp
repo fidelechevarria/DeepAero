@@ -313,7 +313,7 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
     }
     AeroCoeffs_t originalAero = _aero;
     this->init(true); // useInitialTrajectoryStates = true
-    _aero = aero;
+    this->setAeroCoeffs(aero);
     float dt = 1.0F / _frequency;
     // float diffNorth, diffEast, diffDown = 0.0F;
     float diffVx, diffVy, diffVz = 0.0F;

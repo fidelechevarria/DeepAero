@@ -265,6 +265,9 @@ class Model
         inline void setAeroCoeffs(const AeroCoeffs_t aero)
         {
             _aero = aero;
+            // Parameter encoding
+            _aero.Cla *= 100;
+            _aero.Cmmq *= 100;
         }
 
     private:
