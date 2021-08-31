@@ -257,7 +257,7 @@ uint16_t Model::propagate(Controls_t controls, float dtime)
     //Accumulate time
     _internals.total_time += dtime;
 
-    return 69;
+    return 0;
 }
 
 void Model::loadTrajectory(std::string filePath, uint32_t N_samples)

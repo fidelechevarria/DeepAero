@@ -60,7 +60,7 @@ static PyObject * PyModel_loadTrajectory(PyModel* self, PyObject* args)
 
     (self->ptrObj)->loadTrajectory((std::string)file, nsamples);
 
-    return Py_BuildValue("i", 69);
+    return Py_BuildValue("i", 0);
 }
 
 static PyObject * PyModel_getTrajectorySample(PyModel* self, PyObject* args)
