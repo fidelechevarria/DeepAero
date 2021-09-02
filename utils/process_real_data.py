@@ -49,6 +49,20 @@ data['vx'] = vbody[:, 0, 0]
 data['vy'] = vbody[:, 1, 0]
 data['vz'] = vbody[:, 2, 0]
 
+# Set units
+data['roll'] = np.deg2rad(data['roll'])
+data['pitch'] = np.deg2rad(data['pitch'])
+data['yaw'] = np.deg2rad(data['yaw'])
+data['p'] = np.deg2rad(data['p'])
+data['q'] = np.deg2rad(data['q'])
+data['r'] = np.deg2rad(data['r'])
+data['vn'] /= 3.6
+data['ve'] /= 3.6
+data['vd'] /= 3.6
+data['vx'] /= 3.6
+data['vy'] /= 3.6
+data['vz'] /= 3.6
+
 # Plot vels and attitude
 data.plot(x='time', y=['vx', 'vy', 'vz'])
 data.plot(x='time', y=['roll', 'pitch', 'yaw'])
