@@ -225,6 +225,7 @@ class Model
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filePath, uint32_t N_samples);
         void getTrajectorySample(float * buf, uint32_t idx);
+        float calcPenalty(AeroCoeffs_t aero);
         float evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numberOfSamplesToUse);
 
         inline void getStates(States_t * states)
@@ -266,8 +267,8 @@ class Model
         {
             _aero = aero;
             // Parameter encoding
-            _aero.Cla *= 100;
-            _aero.Cmmq *= 100;
+            _aero.Cla *= 10;
+            _aero.Cmmq *= 10;
         }
 
     private:

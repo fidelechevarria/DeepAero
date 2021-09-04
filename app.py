@@ -119,6 +119,7 @@ def load_data(contents, filename):
                 df = pd.read_excel(io.BytesIO(decoded))
             traj_data = df # Store dataset in global variable traj_data
             n_samples = df.shape[0] # Store number of samples
+            print(df)
             optimizer.loadTrajectory(traj_filepath, n_samples)
         except Exception as e:
             print(e)
@@ -177,7 +178,8 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
     global traj_data
     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if 'optimize-button' in changed_id:
-        df_optim, df_real = optimizer.optimize(mode='eval')
+        df_optim = optimizer.optimize(mode='single')
+        df_real = traj_data
         fig_3D = go.Figure()
         fig_3D.add_trace(
             go.Scatter3d(

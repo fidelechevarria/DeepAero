@@ -11,7 +11,8 @@ void Model::init(const bool useInitialTrajectoryStates)
 {
     _internals = {0};
     _states = {0, 0, 0, 0, 0, 0, 0, 0, 900, 0, 0, 0};
-    _params = {750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100};
+    // _params = {750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100};
+    _params = {20, 9.8056, 1.225, 0.3, 100, 1, 0.3, 90, 55, 110, 0, 0, 0, 0, 0, 0, 0, 0, 23};
     _aero = {0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265};
     _controls = {0, 0, 0, 0};
 
@@ -301,6 +302,38 @@ void Model::getTrajectorySample(float * buf, uint32_t idx)
     }
 }
 
+float Model::calcPenalty(AeroCoeffs_t aero)
+{
+    float penalty = 0.0F;
+    penalty += fabs(aero.Cd0);
+    penalty += fabs(aero.K);
+    penalty += fabs(aero.Cdb);
+    penalty += fabs(aero.Cyb);
+    penalty += fabs(aero.Cyda);
+    penalty += fabs(aero.Cydr);
+    penalty += fabs(aero.Cyp);
+    penalty += fabs(aero.Cyr);
+    penalty += fabs(aero.Cl0);
+    penalty += fabs(aero.Cla);
+    penalty += fabs(aero.Cllb);
+    penalty += fabs(aero.Cllda);
+    penalty += fabs(aero.Clldr);
+    penalty += fabs(aero.Cllp);
+    penalty += fabs(aero.Cllr);
+    penalty += fabs(aero.Cmm0);
+    penalty += fabs(aero.Cmma);
+    penalty += fabs(aero.Cmmda);
+    penalty += fabs(aero.Cmmde);
+    penalty += fabs(aero.Cmmdr);
+    penalty += fabs(aero.Cmmq);
+    penalty += fabs(aero.Cnnb);
+    penalty += fabs(aero.Cnnda);
+    penalty += fabs(aero.Cnndr);
+    penalty += fabs(aero.Cnnp);
+    penalty += fabs(aero.Cnnr);
+    return penalty;
+}
+
 float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numberOfSamplesToUse)
 {
     if (numberOfSamplesToUse < 0)
@@ -315,7 +348,7 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
     this->init(true); // useInitialTrajectoryStates = true
     this->setAeroCoeffs(aero);
     float dt = 1.0F / _frequency;
-    // float diffNorth, diffEast, diffDown = 0.0F;
+    float diffNorth, diffEast, diffDown = 0.0F;
     float diffVx, diffVy, diffVz = 0.0F;
     float diffp, diffq, diffr = 0.0F;
     float fitness = 0.0F;
@@ -326,10 +359,10 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
                                _trajectory[3 * _N_samples + i],   //dr
                                _trajectory[4 * _N_samples + i]};  //dt
         this->propagate(controls, dt);
-        // diffNorth = (_states.posNorth - _trajectory[8 * _N_samples + i]);
-        // diffEast = (_states.posEast - _trajectory[9 * _N_samples + i]);
-        // diffDown = (-_states.alt - _trajectory[10 * _N_samples + i]);
-        // fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
+        diffNorth = (_states.posNorth - _trajectory[8 * _N_samples + i]);
+        diffEast = (_states.posEast - _trajectory[9 * _N_samples + i]);
+        diffDown = (-_states.alt - _trajectory[10 * _N_samples + i]);
+        fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
         if (useLinearVelocities)
         {
             diffVx = (_states.vx - _trajectory[11 * _N_samples + i]);
@@ -343,5 +376,5 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
         fitness += sqrtf(diffp * diffp + diffq * diffq + diffr * diffr);
     }
     _aero = originalAero;
-    return fitness / numberOfSamplesToUse;
+    return fitness / numberOfSamplesToUse + this->calcPenalty(aero);
 }

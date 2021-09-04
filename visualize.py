@@ -9,7 +9,7 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 frequency = 60.0
-trajFile = "/home/fidel/repos/deepaero/data_clean.csv"
+trajFile = "/home/fidel/repos/deepaero/data_real_processed.csv"
 nsamples = pd.read_csv(trajFile).shape[0]
 model = optim.Model(frequency)
 model.loadTrajectory(trajFile, nsamples)

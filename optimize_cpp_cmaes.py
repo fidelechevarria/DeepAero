@@ -94,17 +94,17 @@ class Optimizer():
             N_runs = 10
         defaultAero = [0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265]
         defaultAero_encoded = defaultAero.copy()
-        defaultAero_encoded[9] /= 100
-        defaultAero_encoded[20] /= 100
+        defaultAero_encoded[9] /= 10
+        defaultAero_encoded[20] /= 10
         for run in range(N_runs):
             x0 = [0.1, 0.1, 0.1, -0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 0.1, -0.1, 0.1, -1, 0.1, 0.1, -1, 0, -1, 0, -1, 0.1, -0.1, -0.1, -0.1, -0.1]
             x0_encoded = x0.copy()
-            x0_encoded[9] /= 100 
-            x0_encoded[20] /= 100
-            for pop_size in [13]:
-                self.useLinVels = False
+            x0_encoded[9] /= 10 
+            x0_encoded[20] /= 10
+            for pop_size in [500]:
+                self.useLinVels = True
                 self.numberOfSamplesToUse = -1
-                es = cma.CMAEvolutionStrategy(x0_encoded, 0.2, {'popsize': pop_size})
+                es = cma.CMAEvolutionStrategy(x0_encoded, 0.1, {'popsize': pop_size})
                 print('POPSIZE = ' + str(pop_size))
                 # es.optimize(self.fitness)
                 while not es.stop():
@@ -174,7 +174,7 @@ class Optimizer():
                 print('No successful runs')
                 import sys
                 sys.exit(0)
-        return self.getTrajectory(sol_encoded), self.getTrajectory(defaultAero_encoded)
+        return self.getTrajectory(sol_encoded)#, self.getTrajectory(defaultAero_encoded)
 
     def getEvaluationTimeInMicroseconds(self):
         now = datetime.datetime.now()
