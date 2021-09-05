@@ -20,6 +20,7 @@ recording_time = 20 # Duration of recording process (s)
 
 # Create plane object
 plane = optim.Model(update_frequency)
+plane.setAeroCoeffs(-0.00000,  0.09930,  0.00000, -0.14132, -0.00000,  0.00000, -0.00000,  0.00000,  2.14191, 13.06484, -0.49627,  0.33853,  0.00478,  0.00000, -0.00000, -0.03862, -1.28396, -0.00000, -0.75341,  0.00614, -0.00004,  1.06583, -0.18409,  0.00000, -0.00000, -0.00000)
 
 # Auxiliary variables
 m2ft = 3.28084
