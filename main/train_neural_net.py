@@ -1,19 +1,4 @@
-# NOTE: Commands for Debian 10 PC using DOCKER. 
-
-# Direct commands:
-# FOR CREATING CONTAINER AND RUN TRAINING: docker run --gpus all -it -v $PWD:/tmp/deepaero -w /tmp/deepaero  -p 7777:8080 --name peaceful_williamson tensorflow/tensorflow:latest-gpu-jupyter python main/train_neural_net.py
-# FOR RUNNING TENSORBOARD SESSION ON CONTAINER: docker exec -it peaceful_williamson tensorboard --logdir=/tmp/deepaero/logs/ --bind_all --port 8080
-# FOR ACCESSING TENSORBOARD SESSION (LOCAL BROWSER): http://localhost:7777/
-
-# Full commands:
-# FOR CREATING CONTAINER AND ATTACHING SHELL: docker run --gpus all -it -v $PWD:/tmp/deepaero -w /tmp/deepaero  -p 7777:8080 --name peaceful_williamson tensorflow/tensorflow:latest-gpu-jupyter /bin/bash
-# (Optional) ATTACH VS CODE SESSION: Click on green containers button -> Attach to running container. Open folder tmp/deepaero/
-# FOR RUNNING TRAINING (INSIDE CONTAINER SHELL): python main/train_neural_net.py
-# (If not attached to VS Code) FOR ATTACHING ANOTHER SHELL TO CONTAINER (INSIDE LOCAL SHELL): docker exec -it peaceful_williamson /bin/bash
-# FOR RUNNING TENSORBOARD (INSIDE CONTAINER SHELL): tensorboard --logdir=/tmp/deepaero/logs/ --bind_all --port 8080
-# FOR ACCESSING TENSORBOARD SESSION (LOCAL BROWSER): http://localhost:7777/
-
-# NOTE: Commands for Debian 10 PC using CONDA (BETTER).
+# NOTE: Commands for Debian 10 PC using conda env.
 # python main/train_neural_net.py
 # tensorboard --logdir=logs/
 
