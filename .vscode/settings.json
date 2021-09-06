@@ -1,0 +1,12 @@
+{
+    "python.pythonPath": "/home/fidel/anaconda3/envs/tensorflow-gpu/bin/python3",
+    "files.associations": {
+        "chrono": "cpp",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp"
+    }
+}
