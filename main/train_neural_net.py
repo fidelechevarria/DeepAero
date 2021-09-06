@@ -1,5 +1,5 @@
 # NOTE: For launching TensorBoard session execute the following command:
-#     tensorboard --logdir=D:/Repositories/DeepSystemID/logs/
+#     tensorboard --logdir=/home/fidel/repos/deepaero/logs/
 
 import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
