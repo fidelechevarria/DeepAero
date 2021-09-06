@@ -1,5 +1,10 @@
-# NOTE: For launching TensorBoard session execute the following command:
-#     tensorboard --logdir=/home/fidel/repos/deepaero/logs/
+# NOTE: Useful commands for Debian 10 PC:
+# FOR CREATING CONTAINER AND ATTACHING SHELL: docker run --gpus all -it -v $PWD:/tmp/deepaero -w /tmp/deepaero  -p 7777:8080 --name peaceful_williamson tensorflow/tensorflow:latest-gpu-jupyter /bin/bash
+# (Optional) ATTACH VS CODE SESSION: Click on green containers button -> Attach to running container. Open folder tmp/deepaero/
+# FOR RUNNING TRAINING (INSIDE CONTAINER SHELL): python main/train_neural_net.py
+# (If not attached to VS Code) FOR ATTACHING ANOTHER SHELL TO CONTAINER (INSIDE LOCAL SHELL): docker exec -it peaceful_williamson /bin/bash
+# FOR RUNNING TENSORBOARD (INSIDE CONTAINER SHELL): tensorboard --logdir=/tmp/deepaero/logs/ --bind_all --port 8080
+# FOR ACCESSING TENSORBOARD SESSION (LOCAL BROWSER): http://localhost:7777/
 
 import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
@@ -10,7 +15,7 @@ def generator(batch_size=32):
 	while True:  # Loop forever so the generator never terminates
 		X = []
 		y = []
-		for i in range(batch_size):
+		for _ in range(batch_size):
 			X_element, y_element = generate_sample()
 			X.append(X_element)
 			y.append(y_element)
