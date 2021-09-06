@@ -6,7 +6,7 @@
 **.h5
 borrar*/
 logs*/
-.vscode
+# .vscode
 env
 *.pyc
 *.autosave
