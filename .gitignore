@@ -12,3 +12,8 @@ env
 *.autosave
 *.csv
 venv/
+LibUtils
+build/
+outcmaes/
+Pipfile*
+**.swp
