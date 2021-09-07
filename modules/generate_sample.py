@@ -3,15 +3,23 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.par
 import numpy as np
 from utils.random_aero import create_random_aero_model
 from modules.dynamic_model import Model
+import optimcore as optim
 import matplotlib.pyplot as plt
+
+frequency = 60.0
+period = 1 / frequency
 
 def generate_sample():
 
 	# Generate random dynamic model
-	random_aero = create_random_aero_model()
+	aero = create_random_aero_model()
 
 	# Create plane object
-	plane = Model(initVelocity=100, turbulenceIntensity=0, aero=random_aero)
+	# plane = Model(initVelocity=100, turbulenceIntensity=0, aero=aero)
+	plane = optim.Model(frequency)
+	plane.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
+                           aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
+                           aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
 
 	# Auxiliary variables
 	m2ft = 3.28084
@@ -38,9 +46,9 @@ def generate_sample():
 	vx_hist = []
 	vy_hist = []
 	vz_hist = []
-	ox_hist = []
-	oy_hist = []
-	oz_hist = []
+	wx_hist = []
+	wy_hist = []
+	wz_hist = []
 	time_hist = []
 
 	# Set control surfaces angular ranges
@@ -48,14 +56,13 @@ def generate_sample():
 	angular_range_elevator = 0.25
 	angular_range_rudder = 0.25
 
-	# Set update frequency (Hz)
-	update_frequency = 50
-
+	# TODO Try using Numba JIT compilation
 	for iteration in range(500):
 		# Propagate model
-		plane.propagate([da, de, dr, dt], 1/update_frequency, mode='complete')
-		time += 1/update_frequency
-		if iteration % 5 == 0: # 10 Hz in simulation
+		# plane.propagate([da, de, dr, dt], period, mode='complete')
+		plane.propagate(da, de, dr, dt, period)
+		time += period
+		if iteration % 5 == 0: # 12 Hz in simulation
 			# Set controls
 			da += 0.05*((np.random.rand()-0.5))
 			de += 0.05*((np.random.rand()-0.5))
@@ -70,23 +77,25 @@ def generate_sample():
 			de_hist.append(de)
 			dr_hist.append(dr)
 			dt_hist.append(dt)
-			Fx_hist.append(-plane.D)
-			Fy_hist.append(plane.Y)
-			Fz_hist.append(-plane.L)
-			Mx_hist.append(plane.LL)
-			My_hist.append(plane.MM)
-			Mz_hist.append(plane.NN)
-			vx_hist.append(plane.vx)
-			vy_hist.append(plane.vy)
-			vz_hist.append(plane.vz)
-			ox_hist.append(plane.p)
-			oy_hist.append(plane.q)
-			oz_hist.append(plane.r)
+			states = plane.getStates()
+			internals = plane.getInternals()
+			Fx_hist.append(-internals[6]) # D
+			Fy_hist.append(internals[7]) # Y
+			Fz_hist.append(-internals[8]) # L
+			Mx_hist.append(internals[9]) # LL
+			My_hist.append(internals[10]) # MM
+			Mz_hist.append(internals[11]) # NN
+			vx_hist.append(states[9]) # vx
+			vy_hist.append(states[10]) # vy
+			vz_hist.append(states[11]) # vz
+			wx_hist.append(states[6]) # p
+			wy_hist.append(states[7]) # q
+			wz_hist.append(states[8]) # r
 			time_hist.append(time)
 
 	# Create sample
-	X = sum([da_hist, de_hist, dr_hist, dt_hist, Fx_hist, Fy_hist, Fz_hist, Mx_hist, My_hist, Mz_hist, vx_hist, vy_hist, vz_hist, ox_hist, oy_hist, oz_hist], [])
-	y = random_aero
+	X = sum([da_hist, de_hist, dr_hist, dt_hist, Fx_hist, Fy_hist, Fz_hist, Mx_hist, My_hist, Mz_hist, vx_hist, vy_hist, vz_hist, wx_hist, wy_hist, wz_hist], [])
+	y = aero
 
 	return X, y
 
