@@ -1,18 +1,20 @@
 import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 import numpy as np
-from utils.random_aero import create_random_aero_model
-from modules.dynamic_model import Model
 import optimcore as optim
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+# from numba import jit
 
-frequency = 60.0
+frequency = 200.0
 period = 1 / frequency
 
+defaultAero = np.array([0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265])
+
+# @jit() # Does not reduce execution time
 def generate_sample():
 
 	# Generate random dynamic model
-	aero = create_random_aero_model()
+	aero = np.random.uniform(defaultAero * 0.5, defaultAero * 1.5)
 
 	# Create plane object
 	# plane = Model(initVelocity=100, turbulenceIntensity=0, aero=aero)
@@ -56,13 +58,12 @@ def generate_sample():
 	angular_range_elevator = 0.25
 	angular_range_rudder = 0.25
 
-	# TODO Try using Numba JIT compilation
-	for iteration in range(500):
+	for iteration in range(4000):
 		# Propagate model
 		# plane.propagate([da, de, dr, dt], period, mode='complete')
 		plane.propagate(da, de, dr, dt, period)
 		time += period
-		if iteration % 5 == 0: # 12 Hz in simulation
+		if iteration % 40 == 0: # 5 Hz in simulation
 			# Set controls
 			da += 0.05*((np.random.rand()-0.5))
 			de += 0.05*((np.random.rand()-0.5))
@@ -93,10 +94,20 @@ def generate_sample():
 			wz_hist.append(states[8]) # r
 			time_hist.append(time)
 
-	# Create sample
-	X = sum([da_hist, de_hist, dr_hist, dt_hist, Fx_hist, Fy_hist, Fz_hist, Mx_hist, My_hist, Mz_hist, vx_hist, vy_hist, vz_hist, wx_hist, wy_hist, wz_hist], [])
-	y = aero
+	# fig = plt.figure()
+	# ax = fig.add_subplot(1, 1, 1)
+	# ax.plot(wx_hist)
+	# plt.show()
 
+	# Create sample
+	X = np.array([da_hist, de_hist, dr_hist, dt_hist,
+	              Fx_hist, Fy_hist, Fz_hist, Mx_hist,
+				  My_hist, Mz_hist, vx_hist, vy_hist,
+				  vz_hist, wx_hist, wy_hist, wz_hist]).flatten()
+	y = np.array(aero)
 	return X, y
 
-
+if __name__ == '__main__':
+	X, y = generate_sample()
+	print(X.shape)
+	print(y.shape)

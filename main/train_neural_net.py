@@ -11,12 +11,16 @@ def generator(batch_size=32):
 	while True:  # Loop forever so the generator never terminates
 		X = []
 		y = []
-		for _ in range(batch_size):
+		for idx in range(batch_size):
 			X_element, y_element = generate_sample()
-			X.append(X_element)
-			y.append(y_element)
-		X = np.array(X)
-		y = np.array(y)
+			X_element = np.expand_dims(X_element, axis=0)
+			y_element = np.expand_dims(y_element, axis=0)
+			if idx == 0:
+				X = X_element
+				y = y_element
+			else:
+				X = np.concatenate([X, X_element])
+				y = np.concatenate([y, y_element])
 		yield X, y
 
 train_generator = generator()
@@ -48,7 +52,7 @@ model.add(Dropout(0.3))
 model.add(Dense(26))
 
 model.compile(loss='mse', optimizer='adam')
-history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=50, epochs=1000, validation_steps=20, callbacks=callbacks_list)
+history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=50, epochs=10, validation_steps=20, callbacks=callbacks_list)
 
 from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt

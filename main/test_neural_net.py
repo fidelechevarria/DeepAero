@@ -32,8 +32,8 @@ model.load_weights("model.h5")
 
 # Generate sample
 X, y = generate_sample()
-X = np.array(X).reshape((1, 1600))
-y = np.array(y).reshape((1, 26))
+X = np.expand_dims(X, axis=0)
+y = np.expand_dims(y, axis=0)
 
 # estimate accuracy on whole dataset using loaded weights
 loss = model.evaluate(X, y)
