@@ -2,30 +2,38 @@ import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 from modules.generate_sample import generate_sample
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dense, Dropout, GRU, BatchNormalization, Flatten
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+
 # create model
 model = Sequential()
 
-model.add(Dense(1600, activation='relu', input_shape=(1600,)))
-model.add(Dropout(0.3))
+# model.add(Dense(1600, activation='relu', input_shape=(1600,)))
+# model.add(Dropout(0.3))
 
-model.add(Dense(500, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(500, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(100, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(100, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(50, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(50, activation='relu'))
+# model.add(Dropout(0.3))
 
+# model.add(Dense(26))
+
+model.add(GRU(256, return_sequences=True, input_shape=(16, 100)))
+model.add(BatchNormalization())
+model.add(Flatten())
 model.add(Dense(26))
 
 # Compile model (required to make predictions)
 model.compile(loss='mse', optimizer='adam')
+
+print(model.summary())
 
 # load weights
 model.load_weights("model.h5")

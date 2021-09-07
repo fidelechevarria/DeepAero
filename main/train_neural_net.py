@@ -27,7 +27,7 @@ train_generator = generator()
 validation_generator = generator()
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.layers import Dense, Dropout, Flatten, GRU, BatchNormalization
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 
 filepath_mdl = 'model.h5'
@@ -35,20 +35,26 @@ checkpoint = ModelCheckpoint(filepath_mdl, monitor='val_loss', verbose=1, save_b
 tensorboard = TensorBoard(log_dir='./logs', batch_size=32, write_graph=True)
 callbacks_list = [checkpoint, tensorboard]
 
+# create model
 model = Sequential()
 
-model.add(Dense(1600, activation='relu', input_shape=(1600,)))
-model.add(Dropout(0.3))
+# model.add(Dense(1600, activation='relu', input_shape=(1600,)))
+# model.add(Dropout(0.3))
 
-model.add(Dense(500, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(500, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(100, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(100, activation='relu'))
+# model.add(Dropout(0.3))
 
-model.add(Dense(50, activation='relu'))
-model.add(Dropout(0.3))
+# model.add(Dense(50, activation='relu'))
+# model.add(Dropout(0.3))
 
+# model.add(Dense(26))
+
+model.add(GRU(256, return_sequences=True, input_shape=(16, 100)))
+model.add(BatchNormalization())
+model.add(Flatten())
 model.add(Dense(26))
 
 model.compile(loss='mse', optimizer='adam')
