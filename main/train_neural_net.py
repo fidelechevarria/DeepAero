@@ -52,7 +52,7 @@ model.add(Dropout(0.3))
 model.add(Dense(26))
 
 model.compile(loss='mse', optimizer='adam')
-history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=50, epochs=10, validation_steps=20, callbacks=callbacks_list)
+history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=500, epochs=100, validation_steps=20, callbacks=callbacks_list)
 
 from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
