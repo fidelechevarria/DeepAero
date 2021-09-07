@@ -18,8 +18,8 @@ def generate_sample():
 	# plane = Model(initVelocity=100, turbulenceIntensity=0, aero=aero)
 	plane = optim.Model(frequency)
 	plane.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
-                           aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
-                           aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
+                        aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
+                        aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
 
 	# Auxiliary variables
 	m2ft = 3.28084
