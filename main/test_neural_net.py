@@ -25,7 +25,7 @@ model = Sequential()
 
 # model.add(Dense(26))
 
-model.add(GRU(256, return_sequences=True, input_shape=(16, 100)))
+model.add(GRU(1024, return_sequences=True, input_shape=(16, 100)))
 model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(26))
