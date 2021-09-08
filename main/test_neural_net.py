@@ -2,7 +2,7 @@ import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 from modules.generate_sample import generate_sample
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, GRU, BatchNormalization, Flatten
+from tensorflow.keras.layers import Dense, Dropout, LSTM, BatchNormalization, Flatten
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ model = Sequential()
 
 # model.add(Dense(26))
 
-model.add(GRU(1024, return_sequences=True, input_shape=(16, 100)))
+model.add(LSTM(512, return_sequences=True, input_shape=(16, 100)))
 model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(26))

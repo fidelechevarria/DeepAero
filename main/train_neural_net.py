@@ -27,7 +27,7 @@ train_generator = generator()
 validation_generator = generator()
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten, GRU, BatchNormalization
+from tensorflow.keras.layers import Dense, Dropout, Flatten, LSTM, BatchNormalization
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 
 filepath_mdl = 'model.h5'
@@ -52,7 +52,7 @@ model = Sequential()
 
 # model.add(Dense(26))
 
-model.add(GRU(1024, return_sequences=True, input_shape=(16, 100)))
+model.add(LSTM(512, return_sequences=True, input_shape=(16, 100)))
 model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(26))

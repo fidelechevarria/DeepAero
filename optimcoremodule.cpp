@@ -32,6 +32,14 @@ static void PyModel_dealloc(PyModel * self)
     Py_TYPE(self)->tp_free(self);
 }
 
+static PyObject * PyModel_initialize(PyModel *self, PyObject *args)
+// initialize internal variables
+{
+    (self->ptrObj)->init();
+
+    return Py_BuildValue("i", 0);
+}
+
 static PyObject * PyModel_propagate(PyModel* self, PyObject* args)
 {
     float da, de, dr, dt, dtime;
@@ -149,6 +157,19 @@ static PyObject * PyModel_getAeroCoeffs(PyModel* self, PyObject* args)
                          coefs.Cnnp, coefs.Cnnr);
 }
 
+static PyObject * PyModel_getParams(PyModel* self, PyObject* args)
+{
+    Params_t params;
+    (self->ptrObj)->getParams(&params);
+
+    return Py_BuildValue("fffffffffffffffffff",
+                         params.m, params.g, params.rho, params.S, params.Tmax, params.b,
+                         params.c, params.Ix, params.Iy, params.Iz, params.Ixz, params.incidence,
+                         params.windVelocity, params.windHeading, params.windElevation,
+                         params.turbulenceIntensity, params.servosResponseTime,
+                         params.engineResponseTime, params.initVelocity);
+}
+
 static PyObject * PyModel_setStates(PyModel* self, PyObject* args)
 {
     float statesRcv[12];
@@ -242,6 +263,28 @@ static PyObject * PyModel_setAeroCoeffs(PyModel* self, PyObject* args)
     return Py_BuildValue("i", 0);
 }
 
+static PyObject * PyModel_setParams(PyModel* self, PyObject* args)
+{
+    float paramsRcv[19];
+
+    if (!PyArg_ParseTuple(args, "fffffffffffffffffff",
+                         &paramsRcv[0], &paramsRcv[1], &paramsRcv[2], &paramsRcv[3], &paramsRcv[4], &paramsRcv[5],
+                         &paramsRcv[6], &paramsRcv[7], &paramsRcv[8], &paramsRcv[9], &paramsRcv[10], &paramsRcv[11],
+                         &paramsRcv[12], &paramsRcv[13], &paramsRcv[14], &paramsRcv[15], &paramsRcv[16], &paramsRcv[17],
+                         &paramsRcv[18]))
+    {
+        return NULL;
+    }
+
+    Params_t params = {paramsRcv[0], paramsRcv[1], paramsRcv[2], paramsRcv[3], paramsRcv[4], paramsRcv[5],
+                       paramsRcv[6], paramsRcv[7], paramsRcv[8], paramsRcv[9], paramsRcv[10], paramsRcv[11],
+                       paramsRcv[12], paramsRcv[13], paramsRcv[14], paramsRcv[15], paramsRcv[16], paramsRcv[17],
+                       paramsRcv[18]};
+    (self->ptrObj)->setParams(params);
+
+    return Py_BuildValue("i", 0);
+}
+
 static PyObject * optimcore_GetStatesSize(PyObject *self, PyObject *args)
 {
     return Py_BuildValue("I", sizeof(States_t));
@@ -249,6 +292,7 @@ static PyObject * optimcore_GetStatesSize(PyObject *self, PyObject *args)
 
 static PyMethodDef PyModel_methods[] = 
 {
+    {"init", (PyCFunction)PyModel_initialize, METH_VARARGS, "Initializes internal variables"},
     {"propagate", (PyCFunction)PyModel_propagate, METH_VARARGS, "Propagates model"},
     {"loadTrajectory", (PyCFunction)PyModel_loadTrajectory, METH_VARARGS, "Loads trajectory"},
     {"getTrajectorySample", (PyCFunction)PyModel_getTrajectorySample, METH_VARARGS, "Gets trajectory sample"},
@@ -257,10 +301,12 @@ static PyMethodDef PyModel_methods[] =
     {"getControls", (PyCFunction)PyModel_getControls, METH_VARARGS, "Get controls"},
     {"getInternals", (PyCFunction)PyModel_getInternals, METH_VARARGS, "Get internals"},
     {"getAeroCoeffs", (PyCFunction)PyModel_getAeroCoeffs, METH_VARARGS, "Get aerodynamic coefficients"},
+    {"getParams", (PyCFunction)PyModel_getParams, METH_VARARGS, "Get params"},
     {"setStates", (PyCFunction)PyModel_setStates, METH_VARARGS, "Set states"},
     {"setControls", (PyCFunction)PyModel_setControls, METH_VARARGS, "Set controls"},
     {"setInternals", (PyCFunction)PyModel_setInternals, METH_VARARGS, "Set internals"},
     {"setAeroCoeffs", (PyCFunction)PyModel_setAeroCoeffs, METH_VARARGS, "Set aerodynamic coefficients"},
+    {"setParams", (PyCFunction)PyModel_setParams, METH_VARARGS, "Set params"},
     {"GetStatesSize", (PyCFunction)optimcore_GetStatesSize, METH_VARARGS, "Gets states size"},
     {NULL}  /* Sentinel */
 };

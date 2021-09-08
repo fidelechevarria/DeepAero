@@ -1,65 +1,35 @@
 #include "dynamicModel.hpp"
 
 //Constructor
-Model::Model(float freq) : _N_samples(0)
+Model::Model(const float freq) : _N_samples(0)
 {
-    this->init(false);
+    _controls = {0, 0, 0, 0};
+    _states = {0, 0, 0, 0, 0, 0, 0, 0, 900, 0, 0, 0};
+    _internals = {0};
+    _params = {750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100};
+    _aero = {0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265};
     _frequency = freq;
 }
 
-void Model::init(const bool useInitialTrajectoryStates)
+void Model::init(void)
 {
-    _internals = {0};
-    _states = {0, 0, 0, 0, 0, 0, 0, 0, 900, 0, 0, 0};
-    _params = {750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100};
-    _aero = {0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265};
-    _controls = {0, 0, 0, 0};
-
     _firstPropagationCompleted = false;
 
-    if (useInitialTrajectoryStates)
-    {
-        //Set initial variables with loaded trajectory as reference
-        _controls.da = _trajectory[1 * _N_samples];
-        _controls.de = _trajectory[2 * _N_samples];
-        _controls.dr = _trajectory[3 * _N_samples];
-        _controls.dt = _trajectory[4 * _N_samples];
-        _states.roll = _trajectory[5 * _N_samples];
-        _states.pitch = _trajectory[6 * _N_samples];
-        _states.yaw = _trajectory[7 * _N_samples];
-        _states.p = _trajectory[14 * _N_samples];
-        _states.q = _trajectory[15 * _N_samples];
-        _states.r = _trajectory[16 * _N_samples];
-        _states.posNorth = _trajectory[8 * _N_samples];
-        _states.posEast = _trajectory[9 * _N_samples];
-        _states.alt = - _trajectory[10 * _N_samples]; //Caution: negated value
-        _states.vx = _trajectory[11 * _N_samples];
-        _states.vy = _trajectory[12 * _N_samples];
-        _states.vz = _trajectory[13 * _N_samples];
-        _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
-        _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
-        _internals.beta = asinf(_states.vy / _internals.V);
-        _params.initVelocity = _internals.V;
-    }
+    // //For estimation of AoA, pitch and body velocities for level flight
+    // float dynamicPressure = 0.5 * _params.rho * _params.initVelocity * _params.initVelocity;
+    // float term1 = tanf((((_params.m * _params.g) / (dynamicPressure * _params.S)) - _aero.Cl0) / _aero.Cla + _params.incidence);
 
-    //For estimation of AoA, pitch and body velocities for level flight
-    float dynamicPressure = 0.5 * _params.rho * _params.initVelocity * _params.initVelocity;
-    float term1 = tanf((((_params.m * _params.g) / (dynamicPressure * _params.S)) - _aero.Cl0) / _aero.Cla + _params.incidence);
+    // //Set initial velocities
+    // _states.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
+    // _states.vz = _states.vx * term1;
 
-    if (!useInitialTrajectoryStates)
-    {
-        //Set initial velocities
-        _states.vx = sqrtf(_params.initVelocity * _params.initVelocity / (1 + term1 * term1));
-        _states.vz = _states.vx * term1;
+    //Set internal variables
+    _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
+    _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
+    _internals.beta = asinf(_states.vy / _internals.V);
 
-        //Set internal variables
-        _internals.V = sqrtf(_states.vx * _states.vx + _states.vy * _states.vy + _states.vz * _states.vz);
-        _internals.alpha = atan2f(_states.vz, _states.vx) - _params.incidence;
-        _internals.beta = asinf(_states.vy / _internals.V);
-    
-        //Set initial states
-        _states.pitch = _internals.alpha + _params.incidence;  //Same as np.arctan2(_states.vz, _states.vx)
-    }
+    //Set initial states
+    _states.pitch = _internals.alpha + _params.incidence;  //Same as np.arctan2(_states.vz, _states.vx)
     
     //Set internal variables
     _internals.lon = -3.574605617 * DEG2RAD;  //Madrid Barajas Airport (LEMD)
@@ -290,7 +260,7 @@ void Model::loadTrajectory(std::string filePath, uint32_t N_samples)
         _trajectory[stateNumber * _N_samples + lineNumber] = std::stof(lineString);
         lineNumber++;
     }
-    this->init(true); // useInitialTrajectoryStates = true
+    // this->init(true); // useInitialTrajectoryStates = true
 }
 
 void Model::getTrajectorySample(float * buf, uint32_t idx)
@@ -312,7 +282,7 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
         numberOfSamplesToUse = _N_samples;
     }
     AeroCoeffs_t originalAero = _aero;
-    this->init(true); // useInitialTrajectoryStates = true
+    // this->init(true); // useInitialTrajectoryStates = true
     this->setAeroCoeffs(aero);
     float dt = 1.0F / _frequency;
     // float diffNorth, diffEast, diffDown = 0.0F;

@@ -2,39 +2,43 @@ import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 import numpy as np
 import optimcore as optim
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 frequency = 200.0
 period = 1 / frequency
 
+defaultControls = np.array([0, 0, 0, 0])
+defaultStates = np.array([0, 0, 0, 0, 0, 0, 0, 0, 900, 0, 0, 0])
+defaultParams = np.array([750, 9.8056, 1.225, 9.84, 7000, 7.87, 1.25, 3531.9, 2196.4, 4887.7, 0, 0, 0, 0, 0, 0, 0, 0, 100])
 defaultAero = np.array([0.05, 0.01, 0.15, -0.4, 0, 0.19, 0, 0.4, 0.1205, 5.7, -0.0002, -0.33, 0.021, -0.79, 0.075, 0, -1.23, 0, -1.1, 0, -7.34, 0.21, -0.014, -0.11, -0.024, -0.265])
 
 def generate_sample():
 
-	X = np.nan
-	while np.any(np.isnan(X)):
+	N_fails = 0
+
+	while True: # Keep generating samples until one without divergence is found
 
 		# Generate random dynamic model
+		controls = np.random.uniform([-0.5, -0.5, -0.5, 0.0], [0.5, 0.5, 0.5, 1.0])
+		states = np.random.uniform([-np.pi, -np.pi/2, -np.pi, -1.0, -1.0, -1.0, 0.0, 0.0, 900.0, 30.0, -5.0, -10.0],
+		                           [+np.pi, +np.pi/2, +np.pi, +1.0, +1.0, +1.0, 0.0, 0.0, 900.0, 130.0, +5.0, +10.0])
+		params = defaultParams
 		aero = np.random.uniform(defaultAero * 0.5, defaultAero * 1.5)
 
 		# Create plane object
 		# plane = Model(initVelocity=100, turbulenceIntensity=0, aero=aero)
 		plane = optim.Model(frequency)
-		plane.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
-							aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
-							aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
-
-		# Auxiliary variables
-		m2ft = 3.28084
-		rad2deg = 180/np.pi
-		deg2rad = np.pi/180
-		turbulence = 0
+		plane.setControls(*controls)
+		plane.setStates(*states)
+		plane.setParams(*params)
+		plane.setAeroCoeffs(*aero)
+		plane.init()
 
 		# Itialize variables
-		da = 0
-		de = 0
-		dr = 0
-		dt = 0.5
+		da = controls[0]
+		de = controls[1]
+		dr = controls[2]
+		dt = controls[3]
 		time = 0
 		da_hist = []
 		de_hist = []
@@ -53,11 +57,6 @@ def generate_sample():
 		wy_hist = []
 		wz_hist = []
 		time_hist = []
-
-		# Set control surfaces angular ranges
-		angular_range_ailerons = 0.25
-		angular_range_elevator = 0.25
-		angular_range_rudder = 0.25
 
 		for iteration in range(4000):
 			# Propagate model
@@ -95,10 +94,10 @@ def generate_sample():
 				wz_hist.append(states[8]) # r
 				time_hist.append(time)
 
-		# fig = plt.figure()
-		# ax = fig.add_subplot(1, 1, 1)
-		# ax.plot(wx_hist)
-		# plt.show()
+		fig = plt.figure()
+		ax = fig.add_subplot(1, 1, 1)
+		ax.plot(wy_hist)
+		plt.show()
 
 		# Create sample
 		X = np.array([da_hist, de_hist, dr_hist, dt_hist,
@@ -106,7 +105,11 @@ def generate_sample():
 					My_hist, Mz_hist, vx_hist, vy_hist,
 					vz_hist, wx_hist, wy_hist, wz_hist])
 		y = np.array(aero)
-
+		if not np.any(np.isnan(X)):
+			break
+		else:
+			N_fails += 1
+			print(f'{N_fails} Invalid solutions found')
 	return X, y
 
 if __name__ == '__main__':

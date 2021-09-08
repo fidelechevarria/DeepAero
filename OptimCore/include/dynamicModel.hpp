@@ -218,10 +218,10 @@ typedef struct
 class Model
 {
     public:
-        Model(float freq);
+        Model(const float freq);
         ~Model();
         
-        void init(const bool useInitialTrajectoryStates);
+        void init(void);
         uint16_t propagate(Controls_t controls, float dtime);
         void loadTrajectory(std::string filePath, uint32_t N_samples);
         void getTrajectorySample(float * buf, uint32_t idx);
@@ -247,6 +247,11 @@ class Model
             aero[0] = _aero;
         }
 
+        inline void getParams(Params_t * params)
+        {
+            params[0] = _params;
+        }
+
         inline void setStates(const States_t states)
         {
             _states = states;
@@ -268,6 +273,11 @@ class Model
             // Parameter encoding
             // _aero.Cla *= 100;
             // _aero.Cmmq *= 100;
+        }
+
+        inline void setParams(const Params_t params)
+        {
+            _params = params;
         }
 
     private:
