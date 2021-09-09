@@ -52,13 +52,13 @@ model = Sequential()
 
 # model.add(Dense(26))
 
-model.add(LSTM(512, return_sequences=True, input_shape=(16, 100)))
+model.add(LSTM(512, return_sequences=True, input_shape=(10, 100)))
 model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(26))
 
 model.compile(loss='mse', optimizer='adam')
-history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=500, epochs=100, validation_steps=20, callbacks=callbacks_list)
+history_object = model.fit_generator(train_generator, validation_data=validation_generator, verbose=1, steps_per_epoch=500, epochs=500, validation_steps=50, callbacks=callbacks_list)
 
 from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
