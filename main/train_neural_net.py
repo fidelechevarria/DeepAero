@@ -52,7 +52,7 @@ model = Sequential()
 
 # model.add(Dense(26))
 
-model.add(LSTM(512, return_sequences=True, input_shape=(10, 100)))
+model.add(LSTM(512, return_sequences=True, input_shape=(11, 100)))
 model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(26))

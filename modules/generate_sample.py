@@ -2,6 +2,7 @@ import os.path, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)) # Add parent directory to path
 import numpy as np
 import optimcore as optim
+from scipy.spatial.transform import Rotation as R
 # import matplotlib.pyplot as plt
 
 frequency = 200.0
@@ -45,18 +46,25 @@ def generate_sample():
 		de_hist = []
 		dr_hist = []
 		dt_hist = []
-		Fx_hist = []
-		Fy_hist = []
-		Fz_hist = []
-		Mx_hist = []
-		My_hist = []
-		Mz_hist = []
-		vx_hist = []
-		vy_hist = []
-		vz_hist = []
-		wx_hist = []
-		wy_hist = []
-		wz_hist = []
+		# Fx_hist = []
+		# Fy_hist = []
+		# Fz_hist = []
+		# Mx_hist = []
+		# My_hist = []
+		# Mz_hist = []
+		# vx_hist = []
+		# vy_hist = []
+		# vz_hist = []
+		# wx_hist = []
+		# wy_hist = []
+		# wz_hist = []
+		q1_hist = []
+		q2_hist = []
+		q3_hist = []
+		q4_hist = []
+		n_hist = []
+		e_hist = []
+		a_hist = []
 		time_hist = []
 
 		for iteration in range(4000):
@@ -88,12 +96,21 @@ def generate_sample():
 				# Mx_hist.append(internals[9]) # LL
 				# My_hist.append(internals[10]) # MM
 				# Mz_hist.append(internals[11]) # NN
-				vx_hist.append(states[9]) # vx
-				vy_hist.append(states[10]) # vy
-				vz_hist.append(states[11]) # vz
-				wx_hist.append(states[6]) # p
-				wy_hist.append(states[7]) # q
-				wz_hist.append(states[8]) # r
+				r = R.from_euler('ZYX', [states[3], states[4], states[5]], degrees=False)
+				quat = r.as_quat()
+				# vx_hist.append(states[9]) # vx
+				# vy_hist.append(states[10]) # vy
+				# vz_hist.append(states[11]) # vz
+				# wx_hist.append(states[6]) # p
+				# wy_hist.append(states[7]) # q
+				# wz_hist.append(states[8]) # r
+				q1_hist.append(quat[0]) # q1
+				q2_hist.append(quat[1]) # q2
+				q3_hist.append(quat[2]) # q3
+				q4_hist.append(quat[3]) # q4
+				n_hist.append(states[0] / 1000) # north
+				e_hist.append(states[1] / 1000) # east
+				a_hist.append(states[2] / 1000) # alt
 				time_hist.append(time)
 
 		# fig = plt.figure()
@@ -103,8 +120,10 @@ def generate_sample():
 
 		# Create sample
 		X = np.array([da_hist, de_hist, dr_hist, dt_hist,
-					  vx_hist, vy_hist, vz_hist,
-					  wx_hist, wy_hist, wz_hist])
+		              q1_hist, q2_hist, q3_hist, q4_hist,
+					  n_hist, e_hist, a_hist])
+					#   vx_hist, vy_hist, vz_hist,
+					#   wx_hist, wy_hist, wz_hist])
 		y = np.array(aero)
 		if not np.any(np.isnan(X)):
 			break
