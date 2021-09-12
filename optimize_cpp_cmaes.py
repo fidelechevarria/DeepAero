@@ -102,10 +102,10 @@ class Optimizer():
             x0_encoded = x0.copy()
             x0_encoded[9] /= 10 
             x0_encoded[20] /= 10
-            for pop_size in [50]:
+            for pop_size in [13]:
                 self.useLinVels = True
                 self.numberOfSamplesToUse = -1
-                es = cma.CMAEvolutionStrategy(x0_encoded, 0.1, {'popsize': pop_size})
+                es = cma.CMAEvolutionStrategy(x0_encoded, 0.2, {'popsize': pop_size})
                 print('POPSIZE = ' + str(pop_size))
                 # es.optimize(self.fitness)
                 while not es.stop():

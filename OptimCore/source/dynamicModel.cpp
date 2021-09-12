@@ -348,7 +348,7 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
     this->init(true); // useInitialTrajectoryStates = true
     this->setAeroCoeffs(aero);
     float dt = 1.0F / _frequency;
-    float diffNorth, diffEast, diffDown = 0.0F;
+    // float diffNorth, diffEast, diffDown = 0.0F;
     float diffVx, diffVy, diffVz = 0.0F;
     float diffp, diffq, diffr = 0.0F;
     float fitness = 0.0F;
@@ -359,10 +359,10 @@ float Model::evaluate(AeroCoeffs_t aero, bool useLinearVelocities, int32_t numbe
                                _trajectory[3 * _N_samples + i],   //dr
                                _trajectory[4 * _N_samples + i]};  //dt
         this->propagate(controls, dt);
-        diffNorth = (_states.posNorth - _trajectory[8 * _N_samples + i]);
-        diffEast = (_states.posEast - _trajectory[9 * _N_samples + i]);
-        diffDown = (-_states.alt - _trajectory[10 * _N_samples + i]);
-        fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
+        // diffNorth = (_states.posNorth - _trajectory[8 * _N_samples + i]);
+        // diffEast = (_states.posEast - _trajectory[9 * _N_samples + i]);
+        // diffDown = (-_states.alt - _trajectory[10 * _N_samples + i]);
+        // fitness += sqrtf(diffNorth * diffNorth + diffEast * diffEast + diffDown * diffDown);
         if (useLinearVelocities)
         {
             diffVx = (_states.vx - _trajectory[11 * _N_samples + i]);
