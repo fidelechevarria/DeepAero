@@ -52,19 +52,19 @@ def generate_sample():
 		# Mx_hist = []
 		# My_hist = []
 		# Mz_hist = []
-		# vx_hist = []
-		# vy_hist = []
-		# vz_hist = []
-		# wx_hist = []
-		# wy_hist = []
-		# wz_hist = []
-		q1_hist = []
-		q2_hist = []
-		q3_hist = []
-		q4_hist = []
-		n_hist = []
-		e_hist = []
-		a_hist = []
+		vx_hist = []
+		vy_hist = []
+		vz_hist = []
+		wx_hist = []
+		wy_hist = []
+		wz_hist = []
+		# q1_hist = []
+		# q2_hist = []
+		# q3_hist = []
+		# q4_hist = []
+		# n_hist = []
+		# e_hist = []
+		# a_hist = []
 		time_hist = []
 
 		for iteration in range(4000):
@@ -89,41 +89,47 @@ def generate_sample():
 				dt_hist.append(dt)
 				states = plane.getStates()
 				internals = plane.getInternals()
-				# TODO: Probar con quat y pos
 				# Fx_hist.append(-internals[6]) # D
 				# Fy_hist.append(internals[7]) # Y
 				# Fz_hist.append(-internals[8]) # L
 				# Mx_hist.append(internals[9]) # LL
 				# My_hist.append(internals[10]) # MM
 				# Mz_hist.append(internals[11]) # NN
-				r = R.from_euler('ZYX', [states[3], states[4], states[5]], degrees=False)
-				quat = r.as_quat()
-				# vx_hist.append(states[9]) # vx
-				# vy_hist.append(states[10]) # vy
-				# vz_hist.append(states[11]) # vz
-				# wx_hist.append(states[6]) # p
-				# wy_hist.append(states[7]) # q
-				# wz_hist.append(states[8]) # r
-				q1_hist.append(quat[0]) # q1
-				q2_hist.append(quat[1]) # q2
-				q3_hist.append(quat[2]) # q3
-				q4_hist.append(quat[3]) # q4
-				n_hist.append(states[0] / 1000) # north
-				e_hist.append(states[1] / 1000) # east
-				a_hist.append(states[2] / 1000) # alt
+				# r = R.from_euler('ZYX', [states[3], states[4], states[5]], degrees=False)
+				# quat = r.as_quat()
+				vx_hist.append(states[9]) # vx
+				vy_hist.append(states[10]) # vy
+				vz_hist.append(states[11]) # vz
+				wx_hist.append(states[6]) # p
+				wy_hist.append(states[7]) # q
+				wz_hist.append(states[8]) # r
+				# q1_hist.append(quat[0]) # q1
+				# q2_hist.append(quat[1]) # q2
+				# q3_hist.append(quat[2]) # q3
+				# q4_hist.append(quat[3]) # q4
+				# n_hist.append(states[0] / 1000) # north
+				# e_hist.append(states[1] / 1000) # east
+				# a_hist.append(states[2] / 1000) # alt
 				time_hist.append(time)
 
 		# fig = plt.figure()
 		# ax = fig.add_subplot(1, 1, 1)
-		# ax.plot(wy_hist)
+		# ax.plot(vx_hist, color='red')
+		# # ax.get_xaxis().set_ticklabels([])
+		# # ax.get_yaxis().set_ticklabels([])
+		# # Show the major grid lines with dark grey lines
+		# plt.grid(b=True, which='major', color='#666666', linestyle='-')
+		# # Show the minor grid lines with very faint and almost transparent grey lines
+		# plt.minorticks_on()
+		# plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
 		# plt.show()
 
 		# Create sample
 		X = np.array([da_hist, de_hist, dr_hist, dt_hist,
-		              q1_hist, q2_hist, q3_hist, q4_hist,
-					  n_hist, e_hist, a_hist])
-					#   vx_hist, vy_hist, vz_hist,
-					#   wx_hist, wy_hist, wz_hist])
+		            #   q1_hist, q2_hist, q3_hist, q4_hist,
+					#   n_hist, e_hist, a_hist])
+					  vx_hist, vy_hist, vz_hist,
+					  wx_hist, wy_hist, wz_hist])
 		y = np.array(aero)
 		if not np.any(np.isnan(X)):
 			break
