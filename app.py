@@ -15,6 +15,7 @@ import datetime
 import io
 from optimize_cpp_cmaes import Optimizer
 import plotly.express as px
+import numpy as np
 
 # colorseq = px.colors.qualitative.Plotly
 
@@ -106,7 +107,7 @@ app.layout = html.Div(children=[
     [dash.dependencies.State('upload-data', 'filename')])
 def load_data(contents, filename):
     if contents is not None:
-        global traj_data, traj_filepath, n_samples
+        global traj_data, traj_filepath, n_samples, time
         traj_filepath = "/home/fidel/repos/deepaero/" + filename
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
@@ -118,7 +119,9 @@ def load_data(contents, filename):
                 # Assume that the user uploaded an excel file
                 df = pd.read_excel(io.BytesIO(decoded))
             traj_data = df # Store dataset in global variable traj_data
+            traj_data = traj_data.apply(lambda x: np.rad2deg(x) if (x.name == 'roll' or x.name == 'pitch' or x.name == 'yaw' or x.name == 'p' or x.name == 'q' or x.name == 'r') else x)
             n_samples = df.shape[0] # Store number of samples
+            time = np.linspace(0, n_samples * (1 / 60), n_samples)
             print(df)
             optimizer.loadTrajectory(traj_filepath, n_samples)
         except Exception as e:
@@ -180,6 +183,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
     if 'optimize-button' in changed_id:
         df_optim = optimizer.optimize(mode='single')
         df_real = traj_data
+        df_optim = df_optim.apply(lambda x: np.rad2deg(x) if (x.name == 'roll' or x.name == 'pitch' or x.name == 'yaw' or x.name == 'p' or x.name == 'q' or x.name == 'r') else x)
         fig_3D = go.Figure()
         fig_3D.add_trace(
             go.Scatter3d(
@@ -248,24 +252,24 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 
                     vertical_spacing=0.02)
-        fig_2D.add_trace(go.Scatter(name='Real', showlegend=True, y=df_real['roll'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=1, col=1)
-        fig_2D.add_trace(go.Scatter(name='Solution', showlegend=True, y=df_optim['roll'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=1, col=1)
-        fig_2D.add_trace(go.Scatter(name='pitch_real', showlegend=False, y=df_real['pitch'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=2, col=1)
-        fig_2D.add_trace(go.Scatter(name='pitch_optim', showlegend=False, y=df_optim['pitch'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=2, col=1)
-        fig_2D.add_trace(go.Scatter(name='yaw_real', showlegend=False, y=df_real['yaw'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=3, col=1)
-        fig_2D.add_trace(go.Scatter(name='yaw_optim', showlegend=False, y=df_optim['yaw'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=3, col=1)
-        fig_2D.add_trace(go.Scatter(name='vx_real', showlegend=False, y=df_real['vx'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=4, col=1)
-        fig_2D.add_trace(go.Scatter(name='vx_optim', showlegend=False, y=df_optim['vx'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=4, col=1)
-        fig_2D.add_trace(go.Scatter(name='vy_real', showlegend=False, y=df_real['vy'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=5, col=1)
-        fig_2D.add_trace(go.Scatter(name='vy_optim', showlegend=False, y=df_optim['vy'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=5, col=1)
-        fig_2D.add_trace(go.Scatter(name='vz_real', showlegend=False, y=df_real['vz'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=6, col=1)
-        fig_2D.add_trace(go.Scatter(name='vz_optim', showlegend=False, y=df_optim['vz'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=6, col=1)
-        fig_2D.add_trace(go.Scatter(name='p_real', showlegend=False, y=df_real['p'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=7, col=1)
-        fig_2D.add_trace(go.Scatter(name='p_optim', showlegend=False, y=df_optim['p'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=7, col=1)
-        fig_2D.add_trace(go.Scatter(name='q_real', showlegend=False, y=df_real['q'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=8, col=1)
-        fig_2D.add_trace(go.Scatter(name='q_optim', showlegend=False, y=df_optim['q'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=8, col=1)
-        fig_2D.add_trace(go.Scatter(name='r_real', showlegend=False, y=df_real['r'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=9, col=1)
-        fig_2D.add_trace(go.Scatter(name='r_optim', showlegend=False, y=df_optim['r'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=9, col=1)
+        fig_2D.add_trace(go.Scatter(name='Real', showlegend=True, x=time, y=df_real['roll'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='Solution', showlegend=True, x=time, y=df_optim['roll'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch_real', showlegend=False, x=time, y=df_real['pitch'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch_optim', showlegend=False, x=time, y=df_optim['pitch'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw_real', showlegend=False, x=time, y=df_real['yaw'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw_optim', showlegend=False, x=time, y=df_optim['yaw'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx_real', showlegend=False, x=time, y=df_real['vx'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx_optim', showlegend=False, x=time, y=df_optim['vx'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy_real', showlegend=False, x=time, y=df_real['vy'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy_optim', showlegend=False, x=time, y=df_optim['vy'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz_real', showlegend=False, x=time, y=df_real['vz'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz_optim', showlegend=False, x=time, y=df_optim['vz'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='p_real', showlegend=False, x=time, y=df_real['p'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='p_optim', showlegend=False, x=time, y=df_optim['p'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='q_real', showlegend=False, x=time, y=df_real['q'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='q_optim', showlegend=False, x=time, y=df_optim['q'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='r_real', showlegend=False, x=time, y=df_real['r'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=9, col=1)
+        fig_2D.add_trace(go.Scatter(name='r_optim', showlegend=False, x=time, y=df_optim['r'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=9, col=1)
         fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
         fig_2D.update_yaxes(title_text="φ (°)", row=1, col=1)
         fig_2D.update_yaxes(title_text="θ (°)", row=2, col=1)
@@ -329,15 +333,15 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 
                     vertical_spacing=0.02)
-        fig_2D.add_trace(go.Scatter(name='Real', showlegend=True, y=traj_data['roll'], line=dict(shape='linear', color="black", dash='solid')), row=1, col=1)
-        fig_2D.add_trace(go.Scatter(name='pitch', showlegend=False, y=traj_data['pitch'], line=dict(shape='linear', color="black", dash='solid')), row=2, col=1)
-        fig_2D.add_trace(go.Scatter(name='yaw', showlegend=False, y=traj_data['yaw'], line=dict(shape='linear', color="black", dash='solid')), row=3, col=1)
-        fig_2D.add_trace(go.Scatter(name='vx', showlegend=False, y=traj_data['vx'], line=dict(shape='linear', color="black", dash='solid')), row=4, col=1)
-        fig_2D.add_trace(go.Scatter(name='vy', showlegend=False, y=traj_data['vy'], line=dict(shape='linear', color="black", dash='solid')), row=5, col=1)
-        fig_2D.add_trace(go.Scatter(name='vz', showlegend=False, y=traj_data['vz'], line=dict(shape='linear', color="black", dash='solid')), row=6, col=1)
-        fig_2D.add_trace(go.Scatter(name='p', showlegend=False, y=traj_data['p'], line=dict(shape='linear', color="black", dash='solid')), row=7, col=1)
-        fig_2D.add_trace(go.Scatter(name='q', showlegend=False, y=traj_data['q'], line=dict(shape='linear', color="black", dash='solid')), row=8, col=1)
-        fig_2D.add_trace(go.Scatter(name='r', showlegend=False, y=traj_data['r'], line=dict(shape='linear', color="black", dash='solid')), row=9, col=1)
+        fig_2D.add_trace(go.Scatter(name='Real', showlegend=True, x=time, y=traj_data['roll'], line=dict(shape='linear', color="black", dash='solid')), row=1, col=1)
+        fig_2D.add_trace(go.Scatter(name='pitch', showlegend=False, x=time, y=traj_data['pitch'], line=dict(shape='linear', color="black", dash='solid')), row=2, col=1)
+        fig_2D.add_trace(go.Scatter(name='yaw', showlegend=False, x=time, y=traj_data['yaw'], line=dict(shape='linear', color="black", dash='solid')), row=3, col=1)
+        fig_2D.add_trace(go.Scatter(name='vx', showlegend=False, x=time, y=traj_data['vx'], line=dict(shape='linear', color="black", dash='solid')), row=4, col=1)
+        fig_2D.add_trace(go.Scatter(name='vy', showlegend=False, x=time, y=traj_data['vy'], line=dict(shape='linear', color="black", dash='solid')), row=5, col=1)
+        fig_2D.add_trace(go.Scatter(name='vz', showlegend=False, x=time, y=traj_data['vz'], line=dict(shape='linear', color="black", dash='solid')), row=6, col=1)
+        fig_2D.add_trace(go.Scatter(name='p', showlegend=False, x=time, y=traj_data['p'], line=dict(shape='linear', color="black", dash='solid')), row=7, col=1)
+        fig_2D.add_trace(go.Scatter(name='q', showlegend=False, x=time, y=traj_data['q'], line=dict(shape='linear', color="black", dash='solid')), row=8, col=1)
+        fig_2D.add_trace(go.Scatter(name='r', showlegend=False, x=time, y=traj_data['r'], line=dict(shape='linear', color="black", dash='solid')), row=9, col=1)
         fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
         fig_2D.update_yaxes(title_text="φ (°)", row=1, col=1)
         fig_2D.update_yaxes(title_text="θ (°)", row=2, col=1)
