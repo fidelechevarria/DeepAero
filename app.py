@@ -249,6 +249,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
             paper_bgcolor="White",
             title_text="3D trajectory",
         )
+        fig_3D.write_image('images/solution-pos.svg')
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 
                     vertical_spacing=0.02)
@@ -281,6 +282,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D.update_yaxes(title_text="q (°/s)", row=8, col=1)
         fig_2D.update_yaxes(title_text="r (°/s)", row=9, col=1)
         fig_2D.update_xaxes(title_text="Time (s)", row=9, col=1)
+        fig_2D.write_image('images/solution-states.svg')
     elif 'output-data-upload' in changed_id and not traj_data.empty:
         fig_3D = go.Figure()
         fig_3D.add_trace(
@@ -330,6 +332,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
             paper_bgcolor="White",
             title_text="3D trajectory",
         )
+        fig_3D.write_image('images/real-pos.svg')
         fig_2D = make_subplots(rows=9, cols=1, 
                     shared_xaxes=True, 
                     vertical_spacing=0.02)
@@ -353,6 +356,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D.update_yaxes(title_text="q (°/s)", row=8, col=1)
         fig_2D.update_yaxes(title_text="r (°/s)", row=9, col=1)
         fig_2D.update_xaxes(title_text="Time (s)", row=9, col=1)
+        fig_2D.write_image('images/real-states.svg')
     else:
         fig_3D = current_fig_3D
         fig_2D = current_fig_2D
