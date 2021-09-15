@@ -31,9 +31,7 @@ class Optimizer():
         period = 1.0 / frequency
         vismodel = optim.Model(frequency)
         vismodel.loadTrajectory(self.trajFile, self.nsamples)
-        vismodel.setAeroCoeffs(aero[0], aero[1], aero[2], aero[3], aero[4], aero[5], aero[6], aero[7], aero[8],
-                            aero[9], aero[10], aero[11], aero[12], aero[13], aero[14], aero[15], aero[16], aero[17],
-                            aero[18], aero[19], aero[20], aero[21], aero[22], aero[23], aero[24], aero[25])
+        vismodel.setAeroCoeffs(*aero)
         roll = []
         pitch = []
         yaw = []
