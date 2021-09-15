@@ -204,6 +204,7 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
                 legendgroup=1,
                 hovertext="Optim",
                 showlegend=True,
+                opacity=0.5,
                 name="Solution"
             )
         )
@@ -266,6 +267,16 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D.add_trace(go.Scatter(name='r_real', showlegend=False, y=df_real['r'], line=dict(shape='linear', color="black", dash='solid'), opacity=1), row=9, col=1)
         fig_2D.add_trace(go.Scatter(name='r_optim', showlegend=False, y=df_optim['r'], line=dict(shape='linear', color="black", dash='dash'), opacity=0.5), row=9, col=1)
         fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
+        fig_2D.update_yaxes(title_text="φ (°)", row=1, col=1)
+        fig_2D.update_yaxes(title_text="θ (°)", row=2, col=1)
+        fig_2D.update_yaxes(title_text="ψ (°)", row=3, col=1)
+        fig_2D.update_yaxes(title_text="vx (m/s)", row=4, col=1)
+        fig_2D.update_yaxes(title_text="vy (m/s)", row=5, col=1)
+        fig_2D.update_yaxes(title_text="vz (m/s)", row=6, col=1)
+        fig_2D.update_yaxes(title_text="p (°/s)", row=7, col=1)
+        fig_2D.update_yaxes(title_text="q (°/s)", row=8, col=1)
+        fig_2D.update_yaxes(title_text="r (°/s)", row=9, col=1)
+        fig_2D.update_xaxes(title_text="Time (s)", row=9, col=1)
     elif 'output-data-upload' in changed_id and not traj_data.empty:
         fig_3D = go.Figure()
         fig_3D.add_trace(
@@ -328,6 +339,16 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
         fig_2D.add_trace(go.Scatter(name='q', showlegend=False, y=traj_data['q'], line=dict(shape='linear', color="black", dash='solid')), row=8, col=1)
         fig_2D.add_trace(go.Scatter(name='r', showlegend=False, y=traj_data['r'], line=dict(shape='linear', color="black", dash='solid')), row=9, col=1)
         fig_2D.update_layout(height=800, width=800, title_text="2D trajectories")
+        fig_2D.update_yaxes(title_text="φ (°)", row=1, col=1)
+        fig_2D.update_yaxes(title_text="θ (°)", row=2, col=1)
+        fig_2D.update_yaxes(title_text="ψ (°)", row=3, col=1)
+        fig_2D.update_yaxes(title_text="vx (m/s)", row=4, col=1)
+        fig_2D.update_yaxes(title_text="vy (m/s)", row=5, col=1)
+        fig_2D.update_yaxes(title_text="vz (m/s)", row=6, col=1)
+        fig_2D.update_yaxes(title_text="p (°/s)", row=7, col=1)
+        fig_2D.update_yaxes(title_text="q (°/s)", row=8, col=1)
+        fig_2D.update_yaxes(title_text="r (°/s)", row=9, col=1)
+        fig_2D.update_xaxes(title_text="Time (s)", row=9, col=1)
     else:
         fig_3D = current_fig_3D
         fig_2D = current_fig_2D
