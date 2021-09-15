@@ -39,18 +39,28 @@ print(model.summary())
 model.load_weights("model.h5")
 
 # Generate sample
-X, y = generate_sample()
-X = np.expand_dims(X, axis=0)
-y = np.expand_dims(y, axis=0)
+mode = 'real'
+if mode == 'real':
+    data = pd.read_csv('data_real_processed.csv')
+    X = np.expand_dims(np.transpose(data.loc[:, ['da', 'de', 'dr', 'dt', 'vx', 'vy', 'vz', 'p', 'q', 'r']].iloc[::12, :].values), axis=0)
+elif mode == 'sim':
+    X, y = generate_sample()
+    X = np.expand_dims(X, axis=0)
+    y = np.expand_dims(y, axis=0)
 
 # estimate accuracy on whole dataset using loaded weights
-loss = model.evaluate(X, y)
+if mode == 'sim':
+    loss = model.evaluate(X, y)
 prediction = model.predict(X)
 
 # Visualization
-data = {'Real': y[0, :].tolist(), 'Predict': prediction[0, :].tolist()}
+if mode == 'real':
+    data = {'Predict': prediction[0, :].tolist()}
+elif mode == 'sim':
+    data = {'Real': y[0, :].tolist(), 'Predict': prediction[0, :].tolist()}
 df = pd.DataFrame(data)
-print('{}: {}'.format(model.metrics_names, loss))
+if mode == 'sim':
+    print('{}: {}'.format(model.metrics_names, loss))
 print(df.round(5))
 
 
