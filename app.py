@@ -207,8 +207,28 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
                 name="Optimized"
             )
         )
+        fig_3D.add_trace(
+            go.Scatter3d(
+                name="",
+                visible=True,
+                showlegend=False,
+                opacity=0,
+                hoverinfo='none',
+                x=[traj_data['posNorth'][0],traj_data['posNorth'][0]],
+                y=[traj_data['posEast'][0],traj_data['posEast'][0]],
+                z=[700,810]
+            )
+        )
         fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
+            scene=dict(
+                aspectmode="data",
+                camera=dict(
+                    projection=dict(
+                        type="orthographic"
+                    )
+                ),
+                ),
             paper_bgcolor="White",
             title_text="3D trajectory",
         )
@@ -246,11 +266,31 @@ def run_optimization(n_clicks, contents, current_fig_3D, current_fig_2D):
                 legendgroup=1,
                 hovertext="Real",
                 showlegend=True,
-                name="Real"
+                name="Real",
+            )
+        )
+        fig_3D.add_trace(
+            go.Scatter3d(
+                name="",
+                visible=True,
+                showlegend=False,
+                opacity=0,
+                hoverinfo='none',
+                x=[traj_data['posNorth'][0],traj_data['posNorth'][0]],
+                y=[traj_data['posEast'][0],traj_data['posEast'][0]],
+                z=[700,810]
             )
         )
         fig_3D.update_layout(
             margin=dict(l=25, r=25, t=25, b=25),
+            scene=dict(
+                aspectmode="data",
+                camera=dict(
+                    projection=dict(
+                        type="orthographic"
+                    )
+                ),
+                ),
             paper_bgcolor="White",
             title_text="3D trajectory",
         )
