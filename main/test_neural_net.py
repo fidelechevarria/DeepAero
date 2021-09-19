@@ -39,7 +39,7 @@ print(model.summary())
 model.load_weights("model.h5")
 
 # Generate sample
-mode = 'real'
+mode = 'sim'
 if mode == 'real':
     data = pd.read_csv('data_real_processed.csv')
     X = np.expand_dims(np.transpose(data.loc[:, ['da', 'de', 'dr', 'dt', 'vx', 'vy', 'vz', 'p', 'q', 'r']].iloc[::12, :].values), axis=0)
@@ -63,4 +63,5 @@ if mode == 'sim':
     print('{}: {}'.format(model.metrics_names, loss))
 print(df.round(5))
 
+print(np.sum(np.abs(df['Real'].values - df['Predict'].values)))
 
